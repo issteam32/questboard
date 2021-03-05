@@ -139,8 +139,7 @@ Install Skaffold
 
 Overview of Local Development Environment
 --------------------------
-![ff54a308d308fbd9c69d37e80335aa2e.png](:/304a4da723cb40a5a581727373eff78a)
-
+![alt text](https://github.com/issteam32/questboard/blob/master/sample-folder-structure.png?raw=true)
 sample project file structure
 ```
 project-folder/
