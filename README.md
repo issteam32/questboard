@@ -163,3 +163,73 @@ project-folder/
 ```
 
 ---------------------------------------------------------------
+Explanation on demo.spring.rx
+-----------------------------
+demo.spring.rx is a project that used to demostrate the above diagram.
+1. we do whatever we need to do in a spring boot project.
+2. deploy it using skaffold to kubectl cluster
+3. running POSTman or Insonmia to test out the deployed services (pods in kubernetes).
+
+things to take note
+* database is running outside of kubernetes cluster, this is to simulate the production environments.
+  Keeping the database inside kubernetes is hard for maintainance, so we rather isolate it. On every
+  services that we building, we will add a new database using the pattern in the docker-compose.yml file. 
+  
+* as the database is not inside the cluster, we need to specifically defined a service and endpoint 
+  in order to allow the pods to connect to the database. This part is only for development. I'm still exploring the
+  production way of doing it. Refer to the following example,
+  ```
+    kind: Service
+    apiVersion: v1
+    metadata:
+    name: mariadb-tododb
+    spec:
+    ports:
+    - port: 3306
+    targetPort: 3306
+    protocol: TCP
+  ```
+  ```
+    kind: Endpoints
+    apiVersion: v1
+    metadata:
+    name: mariadb-tododb
+    subsets:
+    - addresses:
+        - ip: 192.168.49.1
+          ports:
+        -  port: 3307
+  ```
+  check on the demo.spring.rx/deployment.yaml for more info.
+
+* using nodePort to expose our services to local computer is only for development
+    ```
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: demo-spring-rx
+      labels:
+        app: demo-spring-rx
+    spec:
+      type: NodePort
+      ports:
+        - port: 8082
+          targetPort: 8082
+          nodePort: 30001
+      selector:
+        app: demo-spring-rx
+    ```
+  As kubernetes is running inside minikube, we first need to get the minikube ip address. 
+  run ```minikube ip``` to get the ip address, the using ```nodePort``` port number to connect.
+  In my case, it is 192.168.xx.x:30001
+  
+---------------------------------------------------------------------
+TODO:
+
+[  ] using ingress load balancer controller for production
+
+[  ] pub sub service
+
+[  ] travis pipeline
+
+[  ] cloud artifact location
