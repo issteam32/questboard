@@ -145,16 +145,16 @@ sample project file structure
 project-folder/
 |___services-1-folder/
 |	|___src/
-|	 	Dockerfile # docker production build
-|	 	Dockerfile.dev # docker development build
-|		service-1.pod.yaml
-|		service-1.service.yaml
+|	    Dockerfile # docker production build
+|	    Dockerfile.dev # docker development build
+|	    service-1.pod.yaml
+|	    service-1.service.yaml
 |___services-2-folder/
-|	|__src/
-|		Dockerfile 
-|		Dockerfile.dev
-|		service-2.pod.yaml
-|		service-2.service.yaml
+|	|___src/
+|	    Dockerfile 
+|	    Dockerfile.dev
+|	    service-2.pod.yaml
+|	    service-2.service.yaml
 |___.travis.yml # define the travis build pipeline
 |___.service.account.json.enc # used for deployment
 |___docker-compose.yaml #spin up development database
