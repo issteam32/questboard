@@ -1,0 +1,28 @@
+version: '3'
+services:
+    tododb:
+        container_name: tododb
+        image: 'mariadb'
+        restart: 'on-failure'
+        command: --init-file /demo.init.sql
+        volumes:
+            - $PWD/demo.init.sql:/demo.init.sql
+        environment:              
+            MYSQL_ROOT_PASSWORD: 'password'
+            MYSQL_DATABASE: 'tododb'
+            MYSQL_USER: 'appuser'
+            MYSQL_PASSWORD: 'password'
+            MYSQL_ROOT_HOST: '%'
+        networks: ['backend']
+        ports:
+            - '3307:3306'
+#    demotodo:
+#        depends_on:
+#            - 'tododb'
+#        build: ./demo.spring.rx/.
+#        networks: ['backend']
+#        ports:
+#            - '8082:8082'
+networks:
+    backend:
+        driver: 'bridge'

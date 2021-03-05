@@ -1,0 +1,18 @@
+apiVersion: skaffold/v2beta12
+kind: Config
+metadata:
+  name: questboard
+build:
+  artifacts:
+  - image: demo-spring-rx
+    context: demo.spring.rx
+    docker:
+      dockerfile: Dockerfile
+deploy:
+  kubectl:
+    manifests:
+    - demo.spring.rx/deployment.yaml
+portForward:
+- resourceType: service
+  resourceName: demo-spring-rx
+  port: 8082
