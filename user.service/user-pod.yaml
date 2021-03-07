@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Pod
+metadata:
+  name: user-pod
+  labels:
+    app: user-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-pod
+  template:
+    metadata:
+      labels:
+        app: user-pod
+    spec:
+      containers:
+        - name: user-pod
+          image: user-service-image
+          ports:
+            - containerPort: 8083
+              protocol: TCP

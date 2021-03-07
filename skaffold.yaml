@@ -8,11 +8,19 @@ build:
     context: demo.spring.rx
     docker:
       dockerfile: Dockerfile
+  - image: user-service-image
+    context: user.service
+    docker:
+      dockerfile: Dockerfile
 deploy:
   kubectl:
     manifests:
     - demo.spring.rx/deployment.yaml
+    - user.service/user.deployment.yaml
 portForward:
 - resourceType: service
   resourceName: demo-spring-rx
   port: 8082
+- resourceType: service
+  resourceName: user.service
+  port: 8083
