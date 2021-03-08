@@ -226,10 +226,16 @@ things to take note
 ---------------------------------------------------------------------
 TODO:
 
-[  ] using ingress load balancer controller for production
+w - in progress
 
-[  ] pub sub service
+d - done
 
-[  ] travis pipeline
+```[ w ]``` Setting up OAuth2 
 
-[  ] cloud artifact location
+```[  ]``` using ingress load balancer controller for production
+
+```[  ]``` pub sub service
+
+```[  ]``` travis pipeline
+
+```[  ]``` cloud artifact location
