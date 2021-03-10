@@ -1,0 +1,2 @@
+build package
+mvn package -DskipTests spring-boot:repackage

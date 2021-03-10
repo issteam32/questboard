@@ -40,6 +40,38 @@ services:
         networks: [ 'backend' ]
         ports:
             - '3308:3306'
+
+#if have db then use this
+#    mongoldb:
+#        container_name: userdb
+#        image: 'mysql'
+#        restart: 'on-failure'
+#        deploy:
+#            resources:
+#                limits:
+#                    cpus: '1.0'
+#                    memory: '512m'
+#                reservations:
+#                    cpus: '0.1'
+#                    memory: '100m'
+#        command: --init-file /user.init.sql
+#        volumes:
+#            - $PWD/user.init.sql:/user.init.sql
+#        environment:
+#            MYSQL_ROOT_PASSWORD: 'password'
+#            MYSQL_DATABASE: 'userdb'
+#            MYSQL_USER: 'appuser'
+#            MYSQL_PASSWORD: 'password'
+#            MYSQL_ROOT_HOST: '%'
+#        networks: [ 'backend' ]
+#        ports:
+#            - '3309:3306'
+
+
+
+
+
+
 #    demotodo:
 #        depends_on:
 #            - 'tododb'
