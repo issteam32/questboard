@@ -9,7 +9,8 @@ spec:
   ports:
     - port: 8082
       targetPort: 8082
-      nodePort: 30001
+      //nodeport means expose to outside
+      nodePort: 30001 
   selector:
     app: demo-spring-rx
 ---
@@ -29,7 +30,7 @@ metadata:
   name: mariadb-tododb
 subsets:
   - addresses:
-    - ip: 192.168.49.1
+    - ip: 192.168.49.1 //this need to start minikube and get the minikube IP , this is the local server
     ports:
     -  port: 3307
 ---
