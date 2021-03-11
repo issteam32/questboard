@@ -23,7 +23,7 @@ services:
         deploy:
             resources:
               limits:
-                cpus: '1.0'
+                cpus: '5.0'
                 memory: '512m'
               reservations:
                 cpus: '0.1'
@@ -40,7 +40,23 @@ services:
         networks: [ 'backend' ]
         ports:
             - '3308:3306'
-
+    postgres:
+        container_name: authdb
+        image: postgres
+        deploy:
+            resources:
+                limits:
+                    cpus: '5.0'
+                    memory: '1024m'
+                reservations:
+                    cpus: '0.1'
+                    memory: '256m'
+        environment:
+            POSTGRES_DB: keycloak
+            POSTGRES_USER: keycloak
+            POSTGRES_PASSWORD: password
+        ports:
+            - '5521:5432'
 #if have db then use this
 #    mongoldb:
 #        container_name: userdb

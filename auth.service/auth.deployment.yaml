@@ -1,0 +1,112 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres
+  labels:
+    app: keycloak
+spec:
+  type: ExternalName
+  externalName: 10.0.2.2
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres-authdb-svc
+spec:
+  ports:
+    - port: 5521
+      targetPort: 5521
+      protocol: TCP
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: postgres-authdb-endpoint
+subsets:
+  - addresses:
+      - ip: 192.168.49.1
+    ports:
+      -  port: 5521
+         name: postgres-authdb-svc
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-ingress
+spec:
+  tls:
+    - hosts:
+        - keycloak.192.168.49.2.nip.io
+  rules:
+    - host: keycloak.192.168.49.2.nip.io
+      http:
+        paths:
+          - path: /auth
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-svc
+  labels:
+    app: keycloak-svc
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: keycloak
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: default
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:12.0.4
+          env:
+            - name: DB_ADDR
+              value: postgres-authdb-svc
+            - name: DB_DATABASE
+              value: "keycloak"
+            - name: DB_PASSWORD
+              value: password
+            - name: DB_USER
+              value: keycloak
+            - name: DB_VENDOR
+              value: POSTGRES
+            - name: KEYCLOAK_USER
+              value: "admin"
+            - name: KEYCLOAK_PASSWORD
+              value: "admin"
+            - name: PROXY_ADDRESS_FORWARDING
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: https
+              containerPort: 8443
+          readinessProbe:
+            httpGet:
+              path: /auth/realms/master
+              port: 8080

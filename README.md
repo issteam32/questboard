@@ -112,7 +112,7 @@ Windows Installation, guide from https://docs.docker.com/docker-for-windows/inst
 
 Install Minikube
 1. Download from https://storage.googleapis.com/minikube/releases/latest/minikube-installer.exe
-2. open powershell or cmd then run ```minikube start```
+2. open powershell or cmd then run ```minikube start --driver=hyperv```
 
 Install Skaffold
 1. Download from https://storage.googleapis.com/skaffold/releases/latest/skaffold-windows-amd64.exe
@@ -128,7 +128,7 @@ Mac Installation, guide from https://docs.docker.com/docker-for-mac/install/
 Install Minikube
 1. brew install minikube or ``` curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64 &&
 sudo install minikube-darwin-amd64 /usr/local/bin/minikube ```
-2. Open terminal and ```minikube start```
+2. Open terminal and ```minikube start --driver=hyperkit```
 
 
 Install Skaffold
