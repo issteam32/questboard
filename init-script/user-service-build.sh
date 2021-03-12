@@ -2,7 +2,7 @@
 BYellow='\033[1;33m'
 Color_Off='\033[0m'
 
-cd ./user.service
+cd $PWD/user.service
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- building user service ---"
 
 mvn clean

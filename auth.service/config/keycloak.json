@@ -1,0 +1,10 @@
+{
+  "realm": "Questboard",
+  "auth-server-url": "http://localhost:7070/auth/",
+  "ssl-required": "external",
+  "resource": "questboard-mobile-client",
+  "credentials": {
+    "secret": "ebc475a5-266a-4989-80a5-a7f6fff74e79"
+  },
+  "confidential-port": 0
+}

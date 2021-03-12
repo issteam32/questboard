@@ -15,7 +15,7 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
-    <name>spring-webflux-example</name>
+    <name>chat-service</name>
     <url>http://maven.apache.org</url>
 
     <properties>

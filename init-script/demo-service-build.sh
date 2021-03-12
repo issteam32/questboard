@@ -2,7 +2,7 @@
 BYellow='\033[1;33m'
 Color_Off='\033[0m'
 
-cd ./demo.spring.rx
+cd $PWD/demo.spring.rx
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- building demo service ---"
 
 mvn clean

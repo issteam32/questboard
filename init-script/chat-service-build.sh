@@ -2,7 +2,7 @@
 BYellow='\033[1;33m'
 Color_Off='\033[0m'
 
-cd ./ChatWebSocket
+cd $PWD/ChatWebSocket
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- building chat service ---"
 
 mvn clean

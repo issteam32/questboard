@@ -1,5 +1,6 @@
 package com.questboard.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -7,16 +8,13 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 
 @Table("app_user")
 public class User {
-    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-
-    private final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     @Id
     private Integer id;
-    @Column("user_name")
+    @Column("username")
     private String userName;
     @Column("password")
     private String password;
@@ -25,13 +23,15 @@ public class User {
     @Column("email")
     private String email;
     @Column("register_type")
-    private String registerType;
+    private int registerType;
     @Column("active")
     private Boolean active;
     @Column("created_date")
-    private Timestamp createdDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdDate;
     @Column("updated_date")
-    private Timestamp updatedDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedDate;
 
     public User() {
     }
@@ -76,11 +76,11 @@ public class User {
         this.email = email;
     }
 
-    public String getRegisterType() {
+    public int getRegisterType() {
         return registerType;
     }
 
-    public void setRegisterType(String registerType) {
+    public void setRegisterType(int registerType) {
         this.registerType = registerType;
     }
 
@@ -92,28 +92,28 @@ public class User {
         this.active = active;
     }
 
-    public Timestamp getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Timestamp createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
 
-    public Timestamp getUpdatedDate() {
+    public LocalDateTime getUpdatedDate() {
         return updatedDate;
     }
 
-    public void setUpdatedDate(Timestamp updatedDate) {
+    public void setUpdatedDate(LocalDateTime updatedDate) {
         this.updatedDate = updatedDate;
     }
 
-    public Timestamp parseDateTime(String dt) {
-        try {
-            return new Timestamp(DATE_TIME_FORMAT.parse(dt).getTime());
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
+//    public Timestamp parseDateTime(String dt) {
+//        try {
+//            return new Timestamp(DATE_TIME_FORMAT.parse(dt).getTime());
+//        } catch (ParseException e) {
+//            throw new IllegalArgumentException(e);
+//        }
+//    }
 
 }

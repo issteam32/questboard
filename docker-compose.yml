@@ -6,7 +6,7 @@ services:
         restart: 'on-failure'
         command: --init-file /demo.init.sql
         volumes:
-            - $PWD/demo.init.sql:/demo.init.sql
+            - $PWD/init-script/demo.init.sql:/demo.init.sql
         environment:              
             MYSQL_ROOT_PASSWORD: 'password'
             MYSQL_DATABASE: 'tododb'
@@ -23,14 +23,14 @@ services:
         deploy:
             resources:
               limits:
-                cpus: '1.0'
+                cpus: '5.0'
                 memory: '512m'
               reservations:
                 cpus: '0.1'
                 memory: '100m'
         command: --init-file /user.init.sql
         volumes:
-            - $PWD/user.init.sql:/user.init.sql
+            - $PWD/init-script/user.init.sql:/user.init.sql
         environment:
             MYSQL_ROOT_PASSWORD: 'password'
             MYSQL_DATABASE: 'userdb'
@@ -40,7 +40,47 @@ services:
         networks: [ 'backend' ]
         ports:
             - '3308:3306'
-
+    oauthdb:
+        container_name: oauthdb
+        image: postgres
+        restart: 'on-failure'
+        volumes:
+            - $PWD/auth.service/db:/var/lib/postgresql/data
+        deploy:
+            resources:
+                limits:
+                    cpus: '5.0'
+                    memory: '1024m'
+                reservations:
+                    cpus: '0.1'
+                    memory: '256m'
+        environment:
+            POSTGRES_DB: keycloak
+            POSTGRES_USER: keycloak
+            POSTGRES_PASSWORD: password
+        ports:
+            - '5521:5432'
+    keycloak:
+        image: quay.io/keycloak/keycloak:latest
+        volumes:
+            - $PWD/auth.service/config:/opt/jboss/keycloak/imports
+        command:
+            - "-b 0.0.0.0 -Dkeycloak.import=/opt/jboss/keycloak/imports/realm-export.json"
+        environment:
+            DB_VENDOR: POSTGRES
+            DB_ADDR: oauthdb
+            DB_DATABASE: keycloak
+            DB_USER: keycloak
+            DB_SCHEMA: public
+            DB_PASSWORD: password
+            KEYCLOAK_USER: admin
+            KEYCLOAK_PASSWORD: password
+            # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+            #JDBC_PARAMS: "ssl=true"
+        ports:
+            - 8090:8080
+        depends_on:
+            - oauthdb
 #if have db then use this
 #    mongoldb:
 #        container_name: userdb
@@ -66,12 +106,6 @@ services:
 #        networks: [ 'backend' ]
 #        ports:
 #            - '3309:3306'
-
-
-
-
-
-
 #    demotodo:
 #        depends_on:
 #            - 'tododb'
