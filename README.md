@@ -224,6 +224,14 @@ things to take note
   In my case, it is 192.168.xx.x:30001
   
 ---------------------------------------------------------------------
+Keycloak
+Keycloak used postgres as database and it is running outside of kubernetes.
+In order to keep the team sync with the db setup. We run the following command
+to export the db and let docker-compose create everytime it start.
+
+```docker exec -t <container_id> pg_dumpall -c -U keycloak > dump_2021_03_12.sql```
+
+---------------------------------------------------------------------
 TODO:
 
 w - in progress

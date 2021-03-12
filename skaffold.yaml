@@ -22,6 +22,7 @@ deploy:
     - demo.spring.rx/deployment.yaml
     - user.service/user.deployment.yaml
     - ChatWebSocket/deployment.yaml
+#    - auth.service/auth.deployment.yaml
 portForward:
 - resourceType: service
   resourceName: demo-spring-rx
@@ -32,3 +33,6 @@ portForward:
 - resourceType: service
   resourceName: chat.service
   port: 8084
+#- resourceType: service
+#  resourceName: auth.service
+#  port: 5521
