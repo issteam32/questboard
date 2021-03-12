@@ -12,7 +12,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepo;
 
-    public Flux<User> getUsers(int page, int limit) {
+    public Flux<User> getUsers() {
         return this.userRepo.findAll();
     }
 }
