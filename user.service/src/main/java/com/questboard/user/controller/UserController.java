@@ -18,6 +18,6 @@ public class UserController {
 
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     public ResponseEntity<Flux<User>> getUsers() {
-        return ResponseEntity.ok(this.userService.getUsers(1, 20));
+        return ResponseEntity.ok(this.userService.getUsers());
     }
 }
