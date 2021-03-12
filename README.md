@@ -116,7 +116,10 @@ Install Minikube
 
 Install Skaffold
 1. Download from https://storage.googleapis.com/skaffold/releases/latest/skaffold-windows-amd64.exe
-2. open powershell or cmd then run ```skaffold --help```
+   
+2. Simply download it and place it in your PATH as skaffold.exe
+
+3. open powershell or cmd then run ```skaffold --help```
 
 --------------------------------------------------------------
 Mac Installation, guide from https://docs.docker.com/docker-for-mac/install/
