@@ -226,10 +226,10 @@ things to take note
 ---------------------------------------------------------------------
 Keycloak
 Keycloak used postgres as database and it is running outside of kubernetes.
-In order to keep the team sync with the db setup. We run the following command
-to export the db and let docker-compose create everytime it start.
 
-```docker exec -t <container_id> pg_dumpall -c -U keycloak > dump_2021_03_12.sql```
+To keep keycloak data running locally, remember to create a folder named "db" in auth.service/
+
+Then, run ```docker-compose up``` it shoould start up all the db and keycloak
 
 ---------------------------------------------------------------------
 TODO:
