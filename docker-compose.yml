@@ -6,7 +6,7 @@ services:
         restart: 'on-failure'
         command: --init-file /demo.init.sql
         volumes:
-            - $PWD/demo.init.sql:/demo.init.sql
+            - $PWD/init-script/demo.init.sql:/demo.init.sql
         environment:              
             MYSQL_ROOT_PASSWORD: 'password'
             MYSQL_DATABASE: 'tododb'
@@ -30,7 +30,7 @@ services:
                 memory: '100m'
         command: --init-file /user.init.sql
         volumes:
-            - $PWD/user.init.sql:/user.init.sql
+            - $PWD/init-script/user.init.sql:/user.init.sql
         environment:
             MYSQL_ROOT_PASSWORD: 'password'
             MYSQL_DATABASE: 'userdb'
@@ -40,13 +40,12 @@ services:
         networks: [ 'backend' ]
         ports:
             - '3308:3306'
-    authdb:
-        container_name: authdb
+    oauthdb:
+        container_name: oauthdb
         image: postgres
-        command: --init-fle /dump.sql
+        restart: 'on-failure'
         volumes:
             - $PWD/auth.service/db:/var/lib/postgresql/data
-            - $PWD/auth.service/config/dump_2021_03_12.sql:/dump.sql
         deploy:
             resources:
                 limits:
@@ -63,9 +62,13 @@ services:
             - '5521:5432'
     keycloak:
         image: quay.io/keycloak/keycloak:latest
+        volumes:
+            - $PWD/auth.service/config:/opt/jboss/keycloak/imports
+        command:
+            - "-b 0.0.0.0 -Dkeycloak.import=/opt/jboss/keycloak/imports/realm-export.json"
         environment:
             DB_VENDOR: POSTGRES
-            DB_ADDR: authdb
+            DB_ADDR: oauthdb
             DB_DATABASE: keycloak
             DB_USER: keycloak
             DB_SCHEMA: public
@@ -77,7 +80,7 @@ services:
         ports:
             - 8090:8080
         depends_on:
-            - authdb
+            - oauthdb
 #if have db then use this
 #    mongoldb:
 #        container_name: userdb
@@ -103,12 +106,6 @@ services:
 #        networks: [ 'backend' ]
 #        ports:
 #            - '3309:3306'
-
-
-
-
-
-
 #    demotodo:
 #        depends_on:
 #            - 'tododb'
