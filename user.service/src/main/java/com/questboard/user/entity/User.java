@@ -16,8 +16,6 @@ public class User {
     private Integer id;
     @Column("username")
     private String userName;
-    @Column("password")
-    private String password;
     @Column("sso_uid")
     private String ssoUid;
     @Column("email")
@@ -50,14 +48,6 @@ public class User {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getSsoUid() {

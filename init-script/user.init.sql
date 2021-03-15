@@ -5,7 +5,6 @@ use userdb;
 create table app_user (
     id int not null auto_increment,
     username varchar(100) not null,
-    password varchar(100) not null,
     sso_uid varchar(255) null,
     email varchar(360) null,
     register_type tinyint(3) not null,
