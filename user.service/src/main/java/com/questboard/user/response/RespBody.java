@@ -9,13 +9,13 @@ import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class RespBody<T> {
-    protected List<String> required;
     @Nullable
     protected T data;
-    protected Long responseTime;
+    protected Boolean success;
     protected String error;
     protected int errorCount;
-    protected Boolean success;
+    protected Long responseTime;
+    protected List<String> required;
 
     public static <T> RespBody<T> body(T body) {
         return new RespBody<T>(body);
@@ -48,9 +48,11 @@ public class RespBody<T> {
         if (error.contains("\n")) {
             String[] errors = error.split("\n");
             this.errorCount = errors.length;
-            this.success = false;
-            this.responseTime = new Date().getTime();
+        } else {
+            this.errorCount = 1;
         }
+        this.success = false;
+        this.responseTime = new Date().getTime();
         this.required = new ArrayList<>();
     }
 
@@ -60,9 +62,11 @@ public class RespBody<T> {
         if (error.contains("\n")) {
             String[] errors = error.split("\n");
             this.errorCount = errors.length;
-            this.success = false;
-            this.responseTime = new Date().getTime();
+        } else {
+            this.errorCount = 1;
         }
+        this.success = false;
+        this.responseTime = new Date().getTime();
         this.required = new ArrayList<>();
     }
 
@@ -73,9 +77,11 @@ public class RespBody<T> {
         if (error.contains("\n")) {
             String[] errors = error.split("\n");
             this.errorCount = errors.length;
-            this.success = false;
-            this.responseTime = new Date().getTime();
+        } else {
+            this.errorCount = 1;
         }
+        this.success = false;
+        this.responseTime = new Date().getTime();
     }
 
     public RespBody<T> addRequired(String requiredField) {
@@ -100,6 +106,7 @@ public class RespBody<T> {
 
     public RespBody<T> setError(String err) {
         this.error = err;
+        this.success = false;
         return this;
     }
 

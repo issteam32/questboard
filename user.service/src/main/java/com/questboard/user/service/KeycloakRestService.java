@@ -1,8 +1,10 @@
 package com.questboard.user.service;
 
 import com.questboard.user.dto.UserRegistrationDto;
+import com.questboard.user.dto.UserUpdateDto;
 import com.questboard.user.entity.User;
 import com.questboard.user.repository.UserRepository;
+import org.apache.commons.codec.binary.StringUtils;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UserResource;
@@ -16,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,9 +34,17 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.ignoreCase;
 
 @Service
 public class KeycloakRestService {
@@ -82,10 +94,11 @@ public class KeycloakRestService {
     @Value("${keycloak.admin-cli-id}")
     private String keycloakAdminCliClientId;
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * login request fire from mobile client to keycloak
+     *
      * @param username username
      * @param password password
      * @return access_token
@@ -110,20 +123,31 @@ public class KeycloakRestService {
 
     /**
      * login user and get access token thru keycloak admin rest api
+     *
      * @param username username
      * @param password password
      * @return access_token
      */
-    public Mono<AccessTokenResponse> loginSecure(String username, String password) throws HttpClientErrorException {
-        Keycloak keycloak = KeycloakBuilder.builder().serverUrl(keycloakServerUri)
-                .realm(keycloakRealm)
-                .username(username)
-                .password(password)
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .build();
-        AccessTokenResponse accessToken = keycloak.tokenManager().getAccessToken();
-        return Mono.just(accessToken);
+    public Mono<AccessTokenResponse> loginSecure(String username, String password) {
+        try {
+            Keycloak keycloak = KeycloakBuilder.builder().serverUrl(keycloakServerUri)
+                    .realm(keycloakRealm)
+                    .username(username)
+                    .password(password)
+                    .clientId(clientId)
+                    .clientSecret(clientSecret)
+                    .build();
+            AccessTokenResponse accessToken = keycloak.tokenManager().getAccessToken();
+            return Mono.just(accessToken);
+        } catch (NotAuthorizedException err) {
+            logger.error("Unauthorized access: " + err.getMessage());
+            err.printStackTrace();
+            return Mono.error(err);
+        } catch (Exception err) {
+            logger.error("Unexpected error when login: " + err.getMessage());
+            err.printStackTrace();
+            return Mono.error(err);
+        }
     }
 
 
@@ -136,10 +160,50 @@ public class KeycloakRestService {
      * | 2             | sso login |
      * -----------------------------
      * username cannot have special characters
+     *
      * @param userDto
      * @return true / false
      */
     public Mono<Boolean> registerUser(UserRegistrationDto userDto) {
+        return this.userRepo.existsUserByEmail(userDto.getEmail())
+                .flatMap(emailExist -> {
+                    logger.info("emailExist: " + emailExist);
+                    if (!emailExist) {
+                        return this.userRepo.existsUserByUserName(userDto.getUserName());
+                    } else {
+                        return Mono.just(false);
+                    }
+                })
+                .map(userNameExist -> {
+                    logger.info("userNameExist: " + userNameExist);
+                    if (!userNameExist) {
+                        return this.createKeycloakUser(userDto);
+                    } else {
+                        return Optional.empty();
+                    }
+                })
+                .flatMap(userResource -> {
+                    logger.info("userResource: " + userResource);
+                    if (userResource.isPresent()) {
+                        User user = new User();
+                        user.setUserName(userDto.getUserName());
+                        user.setEmail(userDto.getEmail());
+                        user.setRegisterType(1);
+                        user.setActive(true);
+                        UserRepresentation userRs = ((UserResource) userResource.get()).toRepresentation();
+                        if (userRs != null) {
+                            user.setSsoUid(userRs.getId());
+                        }
+                        this.userRepo.save(user).subscribe();
+
+                        return Mono.just(true);
+                    } else {
+                        return Mono.error(new Error("Username or email is already existed. Please check your form input."));
+                    }
+                });
+    }
+
+    private Optional<UserResource> createKeycloakUser(UserRegistrationDto userDto) {
         String realm = keycloakRealm;
         String superUser = keycloakSuperUsername;
         String superPassword = keycloakSuperPassword;
@@ -148,13 +212,14 @@ public class KeycloakRestService {
         UsersResource usersResource = keycloakRealm.realm(realm).users();
 
         try {
+            if (!userDto.getPassword().equals(userDto.getPasswordConfirm())) {
+                throw new Exception("Password does not match!");
+            }
+
             UserRepresentation userRepresentation = new UserRepresentation();
             userRepresentation.setUsername(userDto.getUserName());
             userRepresentation.setEmail(userDto.getEmail());
 
-            if (!userDto.getPassword().equals(userDto.getPasswordConfirm())) {
-                throw new Exception("Password does not match!");
-            }
             CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
             credentialRepresentation.setType("password");
             credentialRepresentation.setValue(userDto.getPassword());
@@ -167,26 +232,70 @@ public class KeycloakRestService {
 
             String userKeycloakId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
             UserResource userResource = usersResource.get(userKeycloakId);
-
-            if (response.getStatus() == 201) {
-                User user = new User();
-                user.setUserName(userDto.getUserName());
-                user.setEmail(userDto.getEmail());
-                user.setRegisterType(1);
-                user.setActive(true);
-                if (userResource != null) {
-                    if (userResource.toRepresentation() != null) {
-                        user.setSsoUid(userResource.toRepresentation().getId());
-                    }
-                }
-                this.userRepo.save(user).subscribe();
+            if (response.getStatus() >= 200 && response.getStatus() <= 299) {
+                return Optional.of(userResource);
+            } else {
+                throw new Exception("Unable to create new keycloak user, please check the input format");
             }
-
-            return Mono.just(true);
         } catch (Exception e) {
-            logger.error("Error while creating user " + e.getMessage());
-            return Mono.error(e);
+            logger.error("Error when creating keycloak user: " + e.getMessage());
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 
+    public Mono<Boolean> updateUser(UserUpdateDto userDto) {
+        logger.info("userDto" + userDto);
+        return this.userRepo.findById(userDto.getId())
+                .flatMap(user -> {
+                    if (user != null) {
+                        userDto.setSsoUid(user.getSsoUid());
+                        return this.updateKeycloakUser(userDto);
+                    } else {
+                        return Mono.error(new Error("User not found!"));
+                    }
+                })
+                .map(updated -> {
+                   return updated;
+                });
+    }
+
+    private Mono<Boolean> updateKeycloakUser(UserUpdateDto userDto) {
+        String realm = keycloakRealm;
+        String superUser = keycloakSuperUsername;
+        String superPassword = keycloakSuperPassword;
+        String adminCliClientId = keycloakAdminCliClientId;
+        Keycloak keycloakRealm = Keycloak.getInstance(keycloakServerUri, realm, superUser, superPassword, adminCliClientId);
+        UsersResource usersResource = keycloakRealm.realm(realm).users();
+
+        try {
+            UserResource userResource = usersResource.get(userDto.getSsoUid());
+            logger.info("userResource" + userResource);
+            if (userResource != null) {
+                UserRepresentation userRepresentation = userResource.toRepresentation();
+                if (userDto.getPassword() != null && userDto.getPasswordConfirm() != null &&
+                        userDto.getPasswordConfirm().equals(userDto.getPassword())) {
+                    CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
+                    credentialRepresentation.setType("password");
+                    credentialRepresentation.setValue(userDto.getPassword());
+                    userResource.resetPassword(credentialRepresentation);
+                }
+                if (userDto.getEmail() != null) {
+                    userRepresentation.setEmail(userDto.getEmail());
+                }
+                if (userDto.getUpdateActiveStatus()) {
+                    userRepresentation.setEnabled(userDto.getActive());
+                }
+                userResource.update(userRepresentation);
+
+                return Mono.just(true);
+            } else {
+                return Mono.error(new Error("Cannot get user from keycloak with uid: " + userDto.getSsoUid()));
+            }
+        } catch (Exception err) {
+            logger.error("Error when updating user in keycloak: " + err.getMessage());
+            err.printStackTrace();
+            return Mono.error(new Error(err.getMessage()));
+        }
+    }
 }
