@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,14 +27,14 @@ public class UserController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private UserService userService;
+    private UserService userServiceImpl;
 
     @Autowired
     private KeycloakRestService keycloakRestService;
 
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     public ResponseEntity<Flux<User>> getUsers() {
-        return ResponseEntity.ok(this.userService.getUsers());
+        return ResponseEntity.ok(this.userServiceImpl.getUsers());
     }
 
     @RequestMapping(value = "/user/login", method = RequestMethod.POST)
@@ -69,7 +68,7 @@ public class UserController {
 
     @RequestMapping(value = "/user/{id}", method = RequestMethod.GET)
     public Mono<ResponseEntity<RespBody<User>>> getUserById(@PathVariable("id") Integer id) {
-        return this.userService.getUserById(id)
+        return this.userServiceImpl.getUserById(id)
                 .map(user -> ResponseEntity.ok(RespBody.body(user)))
                 .onErrorResume(error -> {
                     logger.error("Error occur when getting user with id" + id);

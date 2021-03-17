@@ -5,9 +5,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
 @Table("app_user")
@@ -32,6 +29,18 @@ public class User {
     private LocalDateTime updatedDate;
 
     public User() {
+    }
+
+    public User(Integer id, String userName, String ssoUid, String email, int registerType, Boolean active,
+                LocalDateTime createdDate, LocalDateTime updatedDate) {
+        this.id = id;
+        this.userName = userName;
+        this.ssoUid = ssoUid;
+        this.email = email;
+        this.registerType = registerType;
+        this.active = active;
+        this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
     }
 
     public Integer getId() {

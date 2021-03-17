@@ -249,14 +249,25 @@ public class KeycloakRestService {
         return this.userRepo.findById(userDto.getId())
                 .flatMap(user -> {
                     if (user != null) {
-                        userDto.setSsoUid(user.getSsoUid());
+                        if (userDto.getEmail() != null) {
+                            user.setEmail(userDto.getEmail());
+                        }
+                        if (userDto.getUpdateActiveStatus()) {
+                            user.setActive(userDto.getActive());
+                        }
+                        this.userRepo.save(user).subscribe();
+                        return Mono.just(true);
+                    } else {
+                        return Mono.just(false);
+                    }
+                })
+                .flatMap(updated -> {
+                    if (updated != null) {
+                        userDto.setSsoUid(userDto.getSsoUid());
                         return this.updateKeycloakUser(userDto);
                     } else {
                         return Mono.error(new Error("User not found!"));
                     }
-                })
-                .map(updated -> {
-                   return updated;
                 });
     }
 
