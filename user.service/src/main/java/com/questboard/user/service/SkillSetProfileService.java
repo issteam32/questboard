@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface SkillSetProfileService {
     public Flux<SkillSetProfile> getUserSkillSetProfiles(Integer userId);
-    public Mono<SkillSetProfile> hideSkillSetProfileFromPublic(Integer id);
+    public Mono<Boolean> setSkillSetProfileVisibility(Integer id);
     public Mono<Boolean> createSkillSetProfile(SkillSetProfile skillSetProfile);
     public Mono<Boolean> updateSkillSetProfile(SkillSetProfile skillSetProfile);
     public Mono<SkillSetProfile> getSkillSetProfileById(Integer id);
