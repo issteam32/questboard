@@ -46,8 +46,6 @@ public class SkillSetProfilerController {
         if (param.containsKey("skillDesc")) {
             skillSetProfile.setSkillDesc(param.get("skillDesc"));
         }
-        skillSetProfile.setDisplay(true);
-        skillSetProfile.setSkillEndorsed(1L);
         return this.skillSetProfileService.createSkillSetProfile(skillSetProfile)
                 .map(created -> ResponseEntity.ok(RespBody.body(created)))
                 .onErrorResume(error -> {

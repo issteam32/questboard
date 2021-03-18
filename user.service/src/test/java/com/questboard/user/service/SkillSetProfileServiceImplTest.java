@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -19,6 +21,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class SkillSetProfileServiceImplTest {
@@ -32,25 +36,37 @@ class SkillSetProfileServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(ssRepo.findByUserId(1)).thenReturn(fluxSkillSetProfileProvider(1));
+        when(ssRepo.findByUserId(anyInt())).thenReturn(fluxSkillSetProfileProvider(1, "userId"));
         when(ssRepo.save(Mockito.any(SkillSetProfile.class))).thenAnswer(
                 invocationOnMock -> {
-                   Object arg = invocationOnMock.getArguments()[0];
-                   if (arg == null) {
-                       return false;
-                   } else {
-                       SkillSetProfile ss = (SkillSetProfile)arg;
-                       if (ss.getUserId() != null && ss.getSkill() != null && ss.getSkillDesc() != null) {
-                           if (validateSKillSetProfileCreation(ss)) {
-                               return false;
-                           } else {
-                               return true;
+                    Object arg = invocationOnMock.getArguments()[0];
+                    if (arg == null) {
+                        return false;
+                    } else {
+                        SkillSetProfile ss = (SkillSetProfile)arg;
+                        if (ss.getDisplay() != null) {
+                            return true;
+                        } else if (ss.getUserId() != null && ss.getSkill() != null && ss.getSkillDesc() != null) {
+                            if (ss.getId() != null) {
+                                return true;
+                            } else {
+                                return !validateSKillSetProfileCreation(ss);
                            }
-                       } else {
+                        } else {
                            return false;
-                       }
-                   }
+                        }
+                    }
                 });
+        when(ssRepo.findBySkill(anyString())).thenAnswer(
+                invocationOnMock -> {
+                    Object arg = invocationOnMock.getArguments()[0];
+                    if (arg == null) {
+                        return null;
+                    } else {
+                        return findSkillSetProfile((String)arg);
+                    }
+                });
+        when(ssRepo.findById(anyInt())).thenReturn(fluxSkillSetProfileProvider(1, "id").next());
     }
 
     @AfterEach
@@ -58,7 +74,16 @@ class SkillSetProfileServiceImplTest {
     }
 
     @Test
-    void getUserSkillSetProfiles() {
+    void shouldGetSkillProfileByUserId() {
+        StepVerifier.create(skillSetProfileService.getUserSkillSetProfiles(1))
+                .expectNextMatches(ss -> ss.getUserId() == 1 && !ss.getSkill().isBlank())
+                .expectNextMatches(ss -> ss.getUserId() == 1 && !ss.getSkill().isBlank())
+                .verifyComplete();
+
+        // if expect nothing return then directly expectComplete, since there are nothing to emit
+        StepVerifier.create(skillSetProfileService.getUserSkillSetProfiles(4))
+                .expectComplete();
+
     }
 
     @Test
@@ -85,10 +110,10 @@ class SkillSetProfileServiceImplTest {
         return Flux.just(skillsetProfileProvider());
     }
 
-    Flux<SkillSetProfile> fluxSkillSetProfileProvider(int userId) {
+    Flux<SkillSetProfile> fluxSkillSetProfileProvider(int id, String type) {
         SkillSetProfile[] ss = skillsetProfileProvider();
         return Flux.fromStream(Arrays.stream(ss)
-                .filter(ssp -> ssp.getUserId() == userId));
+                .filter(ssp -> type.equals("userId") ? ssp.getUserId() == id : ssp.getId() == id));
     }
 
     SkillSetProfile[] skillsetProfileProvider() {
@@ -106,6 +131,11 @@ class SkillSetProfileServiceImplTest {
         SkillSetProfile[] ssps = skillsetProfileProvider();
         return Arrays.stream(ssps)
                 .filter(s -> s.getUserId().equals(ssp.getUserId())).anyMatch(s -> s.getSkill().equals(ssp.getSkill()));
+    }
+
+    Mono<SkillSetProfile> findSkillSetProfile(String skill) {
+        SkillSetProfile[] ssps = skillsetProfileProvider();
+        return fluxSkillSetProfileProvider().filter(ss -> ss.getSkill().equals(skill)).next();
     }
 
     SkillSetProfile newSkillSetProfile() {

@@ -37,6 +37,8 @@ public class SkillSetProfileServiceImpl implements SkillSetProfileService{
 
     @Override
     public Mono<Boolean> createSkillSetProfile(SkillSetProfile skillSetProfile) {
+        skillSetProfile.setDisplay(true);
+        skillSetProfile.setSkillEndorsed(1L);
         return this.ssRepo.save(skillSetProfile).flatMap(ss -> ss != null? Mono.just(true) : Mono.just(false));
     }
 
