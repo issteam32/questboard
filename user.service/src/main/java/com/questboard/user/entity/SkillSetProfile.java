@@ -31,6 +31,18 @@ public class SkillSetProfile {
     public SkillSetProfile() {
     }
 
+    public SkillSetProfile(Integer id, Integer userId, String skill, String skillDesc, Long skillEndorsed,
+                           Boolean display, LocalDateTime createdDate, LocalDateTime updatedDate) {
+        this.id = id;
+        this.userId = userId;
+        this.skill = skill;
+        this.skillDesc = skillDesc;
+        this.skillEndorsed = skillEndorsed;
+        this.display = display;
+        this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
+    }
+
     public Integer getId() {
         return id;
     }
