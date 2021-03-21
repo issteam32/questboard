@@ -58,12 +58,15 @@ class ProfessionalLevelServiceImplTest {
     @Test
     void shouldGetProfessionalLevelById() {
         StepVerifier.create(profService.getProfessionalLevelById(2))
-                .expectNextMatches(pl -> pl.getUserId().equals(1) && pl.getLevel().equals(10))
+                .expectNextMatches(pl -> pl.getUserId().equals(2) && pl.getLevel().equals(10))
                 .expectComplete();
     }
 
     @Test
-    void getProfessionalLevelBySkillId() {
+    void shouldGetProfessionalLevelBySkillId() {
+        StepVerifier.create(profService.getProfessionalLevelBySkillId(1))
+                .expectNextMatches(pl -> pl.getUserId().equals(1) && pl.getLevel().equals(10))
+                .expectComplete();
     }
 
     @Test
