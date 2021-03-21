@@ -7,6 +7,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ProfessionalLevelRepository extends ReactiveCrudRepository<ProfessionalLevel, Integer> {
-    public Flux<SkillSetProfile> findByUserId(Integer userId);
-    public Flux<SkillSetProfile> findBySkill(String skill);
+    public Flux<ProfessionalLevel> findByUserId(Integer userId);
+    public Flux<ProfessionalLevel> findByskillsetProfileId(Integer skillsetProfileId);
 }

@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,36 +38,35 @@ class SkillSetProfileServiceImplTest {
     void setUp() {
         MockitoAnnotations.initMocks(this);
         when(ssRepo.findByUserId(anyInt())).thenReturn(fluxSkillSetProfileProvider(1, "userId"));
-        when(ssRepo.save(Mockito.any(SkillSetProfile.class))).thenAnswer(
-                invocationOnMock -> {
-                    Object arg = invocationOnMock.getArguments()[0];
-                    if (arg == null) {
-                        return false;
-                    } else {
-                        SkillSetProfile ss = (SkillSetProfile)arg;
-                        if (ss.getDisplay() != null) {
-                            return true;
-                        } else if (ss.getUserId() != null && ss.getSkill() != null && ss.getSkillDesc() != null) {
-                            if (ss.getId() != null) {
-                                return true;
-                            } else {
-                                return !validateSKillSetProfileCreation(ss);
-                           }
-                        } else {
-                           return false;
-                        }
-                    }
-                });
         when(ssRepo.findBySkill(anyString())).thenAnswer(
                 invocationOnMock -> {
                     Object arg = invocationOnMock.getArguments()[0];
                     if (arg == null) {
-                        return null;
+                        return Flux.empty();
                     } else {
                         return findSkillSetProfile((String)arg);
                     }
                 });
         when(ssRepo.findById(anyInt())).thenReturn(fluxSkillSetProfileProvider(1, "id").next());
+        when(ssRepo.deleteById(anyInt())).thenAnswer(
+                invocationOnMock -> {
+                    Object arg = invocationOnMock.getArguments()[0];
+                    if (arg == null) {
+                        return new Exception("No id provided");
+                    } else {
+                        List<SkillSetProfile> sspList = new java.util.ArrayList<>(List.of(skillsetProfileProvider()));
+                        Optional<SkillSetProfile> ssp = sspList.stream().filter(ss -> ss.getId().equals(arg)).findFirst();
+                        if (ssp.isPresent()) {
+                            if (sspList.remove(ssp.get())) {
+                                return Mono.empty();
+                            } else {
+                                return new Exception("Unable to delete");
+                            }
+                        } else {
+                            return new Exception("Item not found in list");
+                        }
+                    }
+                });
     }
 
     @AfterEach
@@ -87,23 +87,114 @@ class SkillSetProfileServiceImplTest {
     }
 
     @Test
-    void setSkillSetProfileVisibility() {
+    void shouldSetSkillSetProfileToHidden() {
+        when(ssRepo.save(Mockito.any(SkillSetProfile.class))).thenAnswer(
+                invocationOnMock -> {
+                    Object arg = invocationOnMock.getArguments()[0];
+                    if (arg == null) {
+                        return new Exception("Unable to find skill set profile");
+                    } else {
+                        SkillSetProfile ss = (SkillSetProfile) arg;
+                        return ss.getDisplay() != null && ss.getId() != null;
+                    }
+                });
+        StepVerifier.create(skillSetProfileService.setSkillSetProfileVisibility(1, false))
+                .expectNext(true)
+                .expectComplete();
     }
 
     @Test
-    void createSkillSetProfile() {
+    void shouldCreateSkillSetProfile() {
+        when(ssRepo.save(Mockito.any(SkillSetProfile.class))).thenAnswer(
+                invocationOnMock -> {
+                    Object arg = invocationOnMock.getArguments()[0];
+                    if (arg == null) {
+                        return new Exception("Error when creating new skill set profile");
+                    } else {
+                        SkillSetProfile ss = (SkillSetProfile) arg;
+                        if (ss.getUserId() != null && ss.getSkill() != null && ss.getSkillDesc() != null) {
+                            ss.setId(skillsetProfileProvider().length + 1);
+                            return Mono.just(ss);
+                        } else {
+                            return Mono.empty();
+                        }
+                    }
+                });
+
+        SkillSetProfile ssp = new SkillSetProfile();
+        ssp.setUserId(1);
+        ssp.setSkill(Skill.ACCOUNT_AND_BOOKING.label);
+        ssp.setSkillDesc("Very calculative");
+        StepVerifier.create(skillSetProfileService.createSkillSetProfile(ssp))
+                .expectNextMatches(ss -> ss.getId() != null && ss.getSkill().equals(Skill.ACCOUNT_AND_BOOKING.label))
+                .expectComplete();
+
+        ssp = new SkillSetProfile();
+        ssp.setUserId(1);
+        ssp.setSkill(Skill.GAMING.label);
+        ssp.setSkillDesc("I'm carry");
+        StepVerifier.create(skillSetProfileService.createSkillSetProfile(ssp))
+                .expectError();
+
+        ssp = new SkillSetProfile();
+        ssp.setSkill(Skill.ACCOUNT_AND_BOOKING.label);
+        ssp.setSkillDesc("Very calculative");
+        StepVerifier.create(skillSetProfileService.createSkillSetProfile(ssp))
+                .expectError();
+
     }
 
     @Test
-    void updateSkillSetProfile() {
+    void shouldUpdateSkillSetProfile() {
+        when(ssRepo.save(Mockito.any(SkillSetProfile.class))).thenAnswer(
+                invocationOnMock -> {
+                    Object arg = invocationOnMock.getArguments()[0];
+                    if (arg == null) {
+                        return new Exception("Error when creating new skill set profile");
+                    } else {
+                        SkillSetProfile ss = (SkillSetProfile) arg;
+                        if (ss.getUserId() != null && ss.getSkill() != null && ss.getSkillDesc() != null && ss.getId() != null) {
+                            return Mono.just(ss);
+                        } else {
+                            return Mono.empty();
+                        }
+                    }
+                });
+
+        SkillSetProfile ssp = new SkillSetProfile();
+        ssp.setId(1);
+        ssp.setUserId(1);
+        ssp.setSkill(Skill.ACCOUNT_AND_BOOKING.label);
+        ssp.setSkillDesc("Very calculative");
+        StepVerifier.create(skillSetProfileService.createSkillSetProfile(ssp))
+                .expectNextMatches(ss -> ss.getSkill().equals(Skill.ACCOUNT_AND_BOOKING.label))
+                .expectComplete();
+
     }
 
     @Test
-    void getSkillSetProfileById() {
+    void shouldGetSkillSetProfileById() {
+        StepVerifier.create(skillSetProfileService.getSkillSetProfileById(2))
+                .expectNextMatches(ss -> ss.getSkill().equals(Skill.GAMING.label) && ss.getSkillEndorsed() == 1L)
+                .expectComplete();
     }
 
     @Test
-    void getSkillSetProfileByName() {
+    void shouldGetSkillSetProfileByName() {
+        StepVerifier.create(skillSetProfileService.getSkillSetProfileByName(Skill.PHOTOGRAPHY.label))
+                .expectNextMatches(user -> user.getId().equals(1))
+                .expectNextMatches(user -> user.getId().equals(2))
+                .expectComplete();
+
+        StepVerifier.create(skillSetProfileService.getSkillSetProfileByName(Skill.HOUSEKEEPING.label))
+                .expectNextMatches(user -> user.getId().equals(1))
+                .expectComplete();
+    }
+
+    @Test
+    void shouldDeleteSkillSetProfileById() {
+        StepVerifier.create(skillSetProfileService.deleteSkillSetProfileById(3))
+                .expectComplete();
     }
 
     Flux<SkillSetProfile> fluxSkillSetProfileProvider() {
@@ -124,6 +215,8 @@ class SkillSetProfileServiceImplTest {
                         1L, true, LocalDateTime.now(), LocalDateTime.now()),
                 new SkillSetProfile(3, 2, Skill.PHOTOGRAPHY.label, "I won Nobel with my Photo", 1000L,
                         true, LocalDateTime.now(), LocalDateTime.now()),
+                new SkillSetProfile(4, 1, Skill.PHOTOGRAPHY.label, "I can take really good photo", 100L,
+                        true, LocalDateTime.now(), LocalDateTime.now()),
         };
     }
 
@@ -133,13 +226,13 @@ class SkillSetProfileServiceImplTest {
                 .filter(s -> s.getUserId().equals(ssp.getUserId())).anyMatch(s -> s.getSkill().equals(ssp.getSkill()));
     }
 
-    Mono<SkillSetProfile> findSkillSetProfile(String skill) {
-        SkillSetProfile[] ssps = skillsetProfileProvider();
-        return fluxSkillSetProfileProvider().filter(ss -> ss.getSkill().equals(skill)).next();
+    Flux<SkillSetProfile> findSkillSetProfile(String skill) {
+        return Flux.just(skillsetProfileProvider())
+                .filter(ss -> ss.getSkill().equals(skill));
     }
 
     SkillSetProfile newSkillSetProfile() {
-        return new SkillSetProfile(4, 2, Skill.COOKING.label, "I'm michilen chef!!",
+        return new SkillSetProfile(5, 2, Skill.COOKING.label, "I'm michilen chef!!",
                 200L, true, LocalDateTime.now(), LocalDateTime.now());
     }
 }

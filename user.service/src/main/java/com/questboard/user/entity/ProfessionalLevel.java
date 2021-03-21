@@ -22,6 +22,15 @@ public class ProfessionalLevel {
     public ProfessionalLevel() {
     }
 
+    public ProfessionalLevel(Integer id, Integer userId, Integer level, Integer exp, String title, Integer skillsetProfileId) {
+        this.id = id;
+        this.userId = userId;
+        this.level = level;
+        this.exp = exp;
+        this.title = title;
+        this.skillsetProfileId = skillsetProfileId;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -68,5 +77,9 @@ public class ProfessionalLevel {
 
     public void setSkillsetProfileId(Integer skillsetProfileId) {
         this.skillsetProfileId = skillsetProfileId;
+    }
+
+    public void levelUp() {
+        this.level += 1;
     }
 }
