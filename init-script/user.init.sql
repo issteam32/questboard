@@ -46,7 +46,7 @@ create table personal_profile (
 
 create table skillset_profile (
     id int not null auto_increment,
-    skill int not null,
+    skill varchar(255) not null,
     skill_desc text null,
     skill_endorsed int default 0,
     display tinyint default 1,

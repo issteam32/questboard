@@ -1,11 +1,15 @@
 package com.questboard.user.controller;
 
+import com.questboard.user.dto.SkillSetProfileAndLevelDto;
 import com.questboard.user.entity.SkillSetProfile;
 import com.questboard.user.entity.User;
 import com.questboard.user.response.RespBody;
+import com.questboard.user.service.ProfessionalLevelService;
 import com.questboard.user.service.SkillSetProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -20,16 +24,35 @@ public class SkillSetProfilerController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @Autowired
     private SkillSetProfileService skillSetProfileService;
 
-    @RequestMapping(value = "/user-skillset-profile", method = RequestMethod.GET)
-    public Flux<ResponseEntity<RespBody<SkillSetProfile>>> getUserSkillSetProfile(@PathVariable("id") Integer userId) {
+    @Autowired
+    private ProfessionalLevelService professionalLevelService;
+
+    @RequestMapping(value = "/user-skillset-profile/{id}", method = RequestMethod.GET)
+    public Flux<SkillSetProfileAndLevelDto> getUserSkillSetProfile(@PathVariable("id") Integer userId) {
         return this.skillSetProfileService.getUserSkillSetProfiles(userId)
-                .map(skillSetProfiles -> ResponseEntity.ok(RespBody.body(skillSetProfiles)))
+                .map(skillSetProfile -> {
+                    logger.info("skillsetprofile: {}", skillSetProfile.toString());
+                    SkillSetProfileAndLevelDto skillSetProfileAndLevelDto = new SkillSetProfileAndLevelDto();
+                    skillSetProfileAndLevelDto.setSkillSetProfile(skillSetProfile);
+                    return skillSetProfileAndLevelDto;
+                })
+                .flatMap(skillSetProfileAndLevelDto -> {
+                    logger.info("skillsetprofileandleveldto: {}", skillSetProfileAndLevelDto.toString());
+                    return this.professionalLevelService
+                            .getProfessionalLevelBySkillId(skillSetProfileAndLevelDto.getSkillSetProfile().getId())
+                            .map(professionalLevel -> {
+                                logger.info("profession level: {}", professionalLevel.toString());
+                                skillSetProfileAndLevelDto.setProfessionalLevel(professionalLevel);
+                                return skillSetProfileAndLevelDto;
+                            });
+                })
+//                .flatMap(skillSetProfiles -> ResponseEntity.ok(RespBody.body(skillSetProfiles)))
                 .onErrorResume(error -> {
-                    logger.error("Error when getting user(id:{}} skill set profile: {}", userId, error.getMessage());
-                    return Flux.just(ResponseEntity.status(404)
-                            .body(new  RespBody<>("User skill set profile not found")));
+                    logger.error("Error when getting user (id:{}), error: {}", userId, error.getMessage());
+                    return Flux.error(new Error("User skill set profile not found"));
                 });
     }
 
@@ -48,14 +71,14 @@ public class SkillSetProfilerController {
         return this.skillSetProfileService.createSkillSetProfile(skillSetProfile)
                 .map(ssp -> ResponseEntity.ok(RespBody.body(ssp)))
                 .onErrorResume(error -> {
-                    logger.error("Error when getting user(id:{}}, error: {}", param.get("userId"), error.getMessage());
+                    logger.error("Error when getting user(id:{}), error: {}", param.get("userId"), error.getMessage());
                     return Mono.just(ResponseEntity.badRequest()
                             .body(new RespBody<>(error.getMessage())
                             ));
                 });
     }
 
-    @RequestMapping(value = "/skill-profile/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/skillset-profile/{id}", method = RequestMethod.GET)
     public Mono<ResponseEntity<RespBody<SkillSetProfile>>> getSkillSetProfileById(@PathVariable("id") Integer id) {
         return this.skillSetProfileService.getSkillSetProfileById(id)
                 .map(ssp -> ResponseEntity.ok(RespBody.body(ssp)))
@@ -66,18 +89,17 @@ public class SkillSetProfilerController {
                 });
     }
 
-    @RequestMapping(value = "/user-skill-profile/{skill}", method = RequestMethod.GET)
-    public Flux<ResponseEntity<RespBody<User>>> getSkillSetProfileByName(@PathVariable("skill") String skill) {
+    @RequestMapping(value = "/user-skillset-profile/{skill}", method = RequestMethod.GET)
+    public Flux<User> getSkillSetProfileByName(@PathVariable("skill") String skill) {
         return this.skillSetProfileService.getSkillSetProfileByName(skill)
-                .map(users -> ResponseEntity.ok(RespBody.body(users)))
+                .map(users -> users)
                 .onErrorResume(error -> {
                     logger.error("Error when getting user with this skill set profile(skill:{}), error {}", skill, error.getMessage());
-                    return Flux.just(ResponseEntity.badRequest()
-                            .body(new RespBody<>(error.getMessage())));
+                    return Flux.error(new Error(error.getMessage()));
                 });
     }
 
-    @RequestMapping(value = "/skill-profile/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/skillset-profile/{id}", method = RequestMethod.PUT)
     public Mono<ResponseEntity<RespBody<Boolean>>> updateSkillSetProfile(@RequestBody Map<String, String> param, @PathVariable("id") Integer id) {
         SkillSetProfile skillSetProfile = new SkillSetProfile();
         skillSetProfile.setId(id);
@@ -100,8 +122,9 @@ public class SkillSetProfilerController {
                 });
     }
 
-    @RequestMapping(value = "/skill-set-profile/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/skillset-profile/{id}", method = RequestMethod.DELETE)
     public Mono<Void> deletedSkillSetProfileById(@PathVariable("id") Integer id) {
         return this.skillSetProfileService.deleteSkillSetProfileById(id);
     }
+
 }

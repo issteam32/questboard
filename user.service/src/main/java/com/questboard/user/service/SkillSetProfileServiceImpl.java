@@ -1,5 +1,6 @@
 package com.questboard.user.service;
 
+import com.questboard.user.dto.SkillSetProfileAndLevelDto;
 import com.questboard.user.entity.ProfessionalLevel;
 import com.questboard.user.entity.SkillSetProfile;
 import com.questboard.user.entity.User;
@@ -34,6 +35,23 @@ public class SkillSetProfileServiceImpl implements SkillSetProfileService{
     @Override
     public Flux<SkillSetProfile> getUserSkillSetProfiles(Integer userId) {
         return this.ssRepo.findByUserId(userId);
+//                .map(skillSetProfile -> {
+//                    logger.info("skillsetprofile: {}", skillSetProfile.toString());
+//                    SkillSetProfileAndLevelDto skillSetProfileAndLevelDto = new SkillSetProfileAndLevelDto();
+//                    skillSetProfileAndLevelDto.setSkillSetProfile(skillSetProfile);
+//                    return skillSetProfileAndLevelDto;
+//                })
+//                .map(skillSetProfileAndLevelDto -> {
+//                    return this.profLvlRepo
+//                            .findByskillsetProfileId(skillSetProfileAndLevelDto.getSkillSetProfile().getId())
+//                            .map(profLvl -> {
+//                                skillSetProfileAndLevelDto.setProfessionalLevel(profLvl);
+//                                return skillSetProfileAndLevelDto;
+//                            });
+//                })
+//                .flatMap(skillsetProfileAndLevelDto -> {
+//                    return skillsetProfileAndLevelDto.;
+//                });
     }
 
     @Override
@@ -74,6 +92,7 @@ public class SkillSetProfileServiceImpl implements SkillSetProfileService{
                     pflvl.setTitle(ssp.getSkill() + " Novice ");
                     pflvl.setSkillsetProfileId(ssp.getId());
                     this.profLvlRepo.save(pflvl).subscribe();
+                    logger.info("ssp in creation: {}", ssp);
                     return ssp;
                 });
     }

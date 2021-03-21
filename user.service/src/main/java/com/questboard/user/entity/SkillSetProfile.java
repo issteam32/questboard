@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class SkillSetProfile {
     @Id
     private Integer id;
-    @Column("userid")
+    @Column("user_id")
     private Integer userId;
     @Column("skill")
     private String skill;
