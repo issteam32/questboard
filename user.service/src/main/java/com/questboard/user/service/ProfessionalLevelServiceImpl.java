@@ -34,6 +34,7 @@ public class ProfessionalLevelServiceImpl implements ProfessionalLevelService{
                         professionalLevel.setExp(profLvl.getExp());
                         if (professionalLevel.getExp() >= 100) {
                             professionalLevel.levelUp();
+                            professionalLevel.setExp(professionalLevel.getExp() - 100);
                         }
                     }
                     if (profLvl.getTitle() != null) {

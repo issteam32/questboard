@@ -70,11 +70,23 @@ class ProfessionalLevelServiceImplTest {
     }
 
     @Test
-    void updateProfessionalLevel() {
+    void shouldUpdateProfessionalLevel() {
+        ProfessionalLevel pl = new ProfessionalLevel();
+        pl.setId(2);
+        pl.setTitle("Unknown Master");
+        pl.setExp(10);
+        pl.setUserId(2);
+        StepVerifier.create(profService.updateProfessionalLevel(pl))
+                .expectNextMatches(professionalLevel -> professionalLevel.getLevel().equals(9)
+                        && professionalLevel.getTitle().equals("Unknown Master")
+                        && professionalLevel.getExp().equals(9))
+                .expectComplete();
     }
 
     @Test
     void deleteProfessionalLevelById() {
+        StepVerifier.create(profService.deleteProfessionalLevelById(1))
+                .expectComplete();
     }
 
     Flux<ProfessionalLevel> monoProfessionalProvider(Integer id, String type) {

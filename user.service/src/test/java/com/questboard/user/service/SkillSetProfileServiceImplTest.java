@@ -78,6 +78,7 @@ class SkillSetProfileServiceImplTest {
         StepVerifier.create(skillSetProfileService.getUserSkillSetProfiles(1))
                 .expectNextMatches(ss -> ss.getUserId() == 1 && !ss.getSkill().isBlank())
                 .expectNextMatches(ss -> ss.getUserId() == 1 && !ss.getSkill().isBlank())
+                .expectNextMatches(ss -> ss.getUserId() == 1 && !ss.getSkill().isBlank())
                 .verifyComplete();
 
         // if expect nothing return then directly expectComplete, since there are nothing to emit
