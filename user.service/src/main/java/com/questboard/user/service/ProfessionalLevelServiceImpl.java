@@ -30,8 +30,8 @@ public class ProfessionalLevelServiceImpl implements ProfessionalLevelService{
         }
         return this.profLvlRepo.findById(profLvl.getId())
                 .flatMap(professionalLevel -> {
-                    if (profLvl.getExp() != null && profLvl.getExp() > professionalLevel.getExp()) {
-                        professionalLevel.setExp(profLvl.getExp());
+                    if (profLvl.getExp() != null) {
+                        professionalLevel.setExp(profLvl.getExp() + professionalLevel.getExp());
                         if (professionalLevel.getExp() >= 100) {
                             professionalLevel.levelUp();
                             professionalLevel.setExp(professionalLevel.getExp() - 100);

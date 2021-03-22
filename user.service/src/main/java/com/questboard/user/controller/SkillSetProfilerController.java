@@ -49,7 +49,6 @@ public class SkillSetProfilerController {
                                 return skillSetProfileAndLevelDto;
                             });
                 })
-//                .flatMap(skillSetProfiles -> ResponseEntity.ok(RespBody.body(skillSetProfiles)))
                 .onErrorResume(error -> {
                     logger.error("Error when getting user (id:{}), error: {}", userId, error.getMessage());
                     return Flux.error(new Error("User skill set profile not found"));
@@ -57,7 +56,7 @@ public class SkillSetProfilerController {
     }
 
     @RequestMapping(value = "/user-skillset-profile", method = RequestMethod.POST)
-    public Mono<ResponseEntity<RespBody<SkillSetProfile>>> createUserSkillSetProfile(@RequestBody HashMap<String, String> param) {
+    public Mono<SkillSetProfile> createUserSkillSetProfile(@RequestBody HashMap<String, String> param) {
         SkillSetProfile skillSetProfile = new SkillSetProfile();
         if (param.containsKey("userId")) {
             skillSetProfile.setUserId(Integer.parseInt(param.get("userId")));
@@ -69,28 +68,25 @@ public class SkillSetProfilerController {
             skillSetProfile.setSkillDesc(param.get("skillDesc"));
         }
         return this.skillSetProfileService.createSkillSetProfile(skillSetProfile)
-                .map(ssp -> ResponseEntity.ok(RespBody.body(ssp)))
+                .map(ssp -> ssp)
                 .onErrorResume(error -> {
                     logger.error("Error when getting user(id:{}), error: {}", param.get("userId"), error.getMessage());
-                    return Mono.just(ResponseEntity.badRequest()
-                            .body(new RespBody<>(error.getMessage())
-                            ));
+                    return Mono.error(new Error(error.getMessage()));
                 });
     }
 
     @RequestMapping(value = "/skillset-profile/{id}", method = RequestMethod.GET)
-    public Mono<ResponseEntity<RespBody<SkillSetProfile>>> getSkillSetProfileById(@PathVariable("id") Integer id) {
+    public Mono<SkillSetProfile> getSkillSetProfileById(@PathVariable("id") Integer id) {
         return this.skillSetProfileService.getSkillSetProfileById(id)
-                .map(ssp -> ResponseEntity.ok(RespBody.body(ssp)))
+                .map(ssp -> ssp)
                 .onErrorResume(error -> {
                     logger.error("Error when getting skill set profile(id:{}}, error {}", id, error.getMessage());
-                    return Mono.just(ResponseEntity.badRequest()
-                            .body(new RespBody<>(error.getMessage())));
+                    return Mono.error(new Error(error.getMessage()));
                 });
     }
 
-    @RequestMapping(value = "/user-skillset-profile/{skill}", method = RequestMethod.GET)
-    public Flux<User> getSkillSetProfileByName(@PathVariable("skill") String skill) {
+    @RequestMapping(value = "/skillset-profile", method = RequestMethod.GET)
+    public Flux<User> getSkillSetProfileByName(@RequestParam(name = "skill") String skill) {
         return this.skillSetProfileService.getSkillSetProfileByName(skill)
                 .map(users -> users)
                 .onErrorResume(error -> {
@@ -100,7 +96,7 @@ public class SkillSetProfilerController {
     }
 
     @RequestMapping(value = "/skillset-profile/{id}", method = RequestMethod.PUT)
-    public Mono<ResponseEntity<RespBody<Boolean>>> updateSkillSetProfile(@RequestBody Map<String, String> param, @PathVariable("id") Integer id) {
+    public Mono<Boolean> updateSkillSetProfile(@RequestBody Map<String, String> param, @PathVariable("id") Integer id) {
         SkillSetProfile skillSetProfile = new SkillSetProfile();
         skillSetProfile.setId(id);
         if (param.containsKey("skillEndorsed")) {
@@ -114,11 +110,10 @@ public class SkillSetProfilerController {
         }
 
         return this.skillSetProfileService.updateSkillSetProfile(skillSetProfile)
-                .map(updated -> ResponseEntity.ok(RespBody.body(updated)))
+                .map(updated -> updated)
                 .onErrorResume(error -> {
                     logger.error("Error occur when updating skill set profile ({}), error {}", id, error.getMessage());
-                    return Mono.just(ResponseEntity.badRequest()
-                            .body(new RespBody<>(error.getMessage())));
+                    return Mono.error(new Error(error.getMessage()));
                 });
     }
 
