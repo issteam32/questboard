@@ -5,9 +5,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
 @Table("app_user")
@@ -16,8 +13,6 @@ public class User {
     private Integer id;
     @Column("username")
     private String userName;
-    @Column("password")
-    private String password;
     @Column("sso_uid")
     private String ssoUid;
     @Column("email")
@@ -36,6 +31,18 @@ public class User {
     public User() {
     }
 
+    public User(Integer id, String userName, String ssoUid, String email, int registerType, Boolean active,
+                LocalDateTime createdDate, LocalDateTime updatedDate) {
+        this.id = id;
+        this.userName = userName;
+        this.ssoUid = ssoUid;
+        this.email = email;
+        this.registerType = registerType;
+        this.active = active;
+        this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -50,14 +57,6 @@ public class User {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getSsoUid() {
@@ -107,13 +106,5 @@ public class User {
     public void setUpdatedDate(LocalDateTime updatedDate) {
         this.updatedDate = updatedDate;
     }
-
-//    public Timestamp parseDateTime(String dt) {
-//        try {
-//            return new Timestamp(DATE_TIME_FORMAT.parse(dt).getTime());
-//        } catch (ParseException e) {
-//            throw new IllegalArgumentException(e);
-//        }
-//    }
 
 }
