@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono;
 
 public interface NoviceLevelRepository extends ReactiveCrudRepository<NoviceLevel, Integer> {
     public Mono<NoviceLevel> findByUserId(Integer userId);
-    public Flux<NoviceLevel> findByTitleLikeIgnoreCase(String title);
+    public Flux<NoviceLevel> findByTitleContainingIgnoreCase(String title);
 }

@@ -4,9 +4,12 @@ package com.questboard.user.controller;
 import com.questboard.user.dto.UserLoginDto;
 import com.questboard.user.dto.UserRegistrationDto;
 import com.questboard.user.dto.UserUpdateDto;
+import com.questboard.user.entity.SocialAccount;
 import com.questboard.user.entity.User;
+import com.questboard.user.enums.SocialPlatform;
 import com.questboard.user.response.RespBody;
 import com.questboard.user.service.KeycloakRestService;
+import com.questboard.user.service.SocialAccountService;
 import com.questboard.user.service.UserService;
 import org.keycloak.representations.AccessTokenResponse;
 import org.slf4j.Logger;
@@ -31,6 +34,9 @@ public class UserController {
 
     @Autowired
     private KeycloakRestService keycloakRestService;
+
+    @Autowired
+    private SocialAccountService socialAccountService;
 
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     public ResponseEntity<Flux<User>> getUsers() {
@@ -110,5 +116,55 @@ public class UserController {
                                     .failed()
                                     .setRequired(userUpdateDto.requiredFields())));
                 });
+    }
+
+    @RequestMapping(value = "/user-social-account/{id}", method = RequestMethod.GET)
+    public Flux<SocialAccount> getUserSocialAccount(@PathVariable("id") Integer userId) {
+        return this.socialAccountService.getSocialAccountByUserId(userId);
+    }
+
+    @RequestMapping(value = "/user-social-account/{id}", method = RequestMethod.POST)
+    public Mono<SocialAccount> linkupUserSocialAccount(@RequestBody Map<String, String> param, @PathVariable("id") Integer userId) {
+        SocialAccount socialAccount = new SocialAccount();
+        if (userId != null) {
+            socialAccount.setUserId(userId);
+        }
+        if (param.containsKey("socialAccountLink")) {
+            socialAccount.setSocialAcctLink(param.get("socialAccountLink"));
+        }
+        if (param.containsKey("socialPlatform")) {
+            Integer sp = Integer.parseInt(param.get("socialPlatform"));
+            if (sp.equals(SocialPlatform.FACEBOOK.value)) {
+                socialAccount.setSocialPlatform(SocialPlatform.FACEBOOK.value);
+            } else if (sp.equals(SocialPlatform.GOOGLE.value)) {
+                socialAccount.setSocialPlatform(SocialPlatform.GOOGLE.value);
+            }
+        }
+        return this.socialAccountService.linkupSocialAccount(socialAccount)
+                .onErrorResume(error -> {
+                    logger.error("Unable to link up social account with (userId:{}), error: {}", userId, error.getMessage());
+                    return Mono.error(new Error(error.getMessage()));
+                });
+    }
+
+    @RequestMapping(value = "/social-account/{id}", method = RequestMethod.PUT)
+    public Mono<SocialAccount> updateUserSocialAccount(@RequestBody Map<String, String> param, @PathVariable("id") Integer id) {
+        SocialAccount socialAccount = new SocialAccount();
+        if (id != null) {
+            socialAccount.setId(id);
+        }
+        if (param.containsKey("socialAccountLink")) {
+            socialAccount.setSocialAcctLink(param.get("socialAccountLink"));
+        }
+        return this.socialAccountService.updateSocialAccount(socialAccount)
+                .onErrorResume(error -> {
+                   logger.error("Unable to update social account (id:{}), error: {}", id, error.getMessage());
+                   return Mono.error(new Error(error.getMessage()));
+                });
+    }
+
+    @RequestMapping(value = "/social-account/{id}", method = RequestMethod.DELETE)
+    public Mono<Void> deleteSocialAccountById(@PathVariable("id") Integer id) {
+        return this.socialAccountService.deleteSocialAccountById(id);
     }
 }

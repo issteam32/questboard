@@ -46,22 +46,19 @@ public class NoviceLevelServiceImpl implements NoviceLevelService{
     public Mono<NoviceLevel> updateNoviceLevel(NoviceLevel noviceLevel) {
         return this.noviceLevelRepo.findById(noviceLevel.getId())
                 .flatMap(noviceLvl -> {
-                    if (noviceLvl != null) {
-                        if (noviceLevel.getTitle() != null) {
-                            noviceLvl.setTitle(noviceLevel.getTitle());
-                        }
-                        if (noviceLevel.getExp() != null) {
-                            noviceLvl.setExp(noviceLevel.getExp() + noviceLvl.getExp());
-                            if (noviceLvl.getExp() >= 100) {
-                                noviceLvl.levelUp();
-                                noviceLvl.setExp(noviceLvl.getExp() - 100);
-                            }
-                        }
-                        return this.noviceLevelRepo.save(noviceLvl);
-                    } else {
-                        return Mono.error(new Error("Novice level not found"));
+                    if (noviceLevel.getTitle() != null) {
+                        noviceLvl.setTitle(noviceLevel.getTitle());
                     }
-                });
+                    if (noviceLevel.getExp() != null) {
+                        noviceLvl.setExp(noviceLevel.getExp() + noviceLvl.getExp());
+                        if (noviceLvl.getExp() >= 100) {
+                            noviceLvl.levelUp();
+                            noviceLvl.setExp(noviceLvl.getExp() - 100);
+                        }
+                    }
+                    return this.noviceLevelRepo.save(noviceLvl);
+                })
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new Error("Novice level not found"))));
     }
 
     @Override
@@ -71,7 +68,7 @@ public class NoviceLevelServiceImpl implements NoviceLevelService{
 
     @Override
     public Flux<NoviceLevel> getNoviceLevelByTitle(String title) {
-        return this.noviceLevelRepo.findByTitleLikeIgnoreCase(title);
+        return this.noviceLevelRepo.findByTitleContainingIgnoreCase(title);
     }
 
     @Override

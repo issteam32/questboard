@@ -107,12 +107,4 @@ public class User {
         this.updatedDate = updatedDate;
     }
 
-//    public Timestamp parseDateTime(String dt) {
-//        try {
-//            return new Timestamp(DATE_TIME_FORMAT.parse(dt).getTime());
-//        } catch (ParseException e) {
-//            throw new IllegalArgumentException(e);
-//        }
-//    }
-
 }
