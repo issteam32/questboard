@@ -241,7 +241,25 @@ w - in progress
 
 d - done
 
-```[ w ]``` Setting up OAuth2 
+```[ d ]``` Setting up OAuth2 
+
+```[ d ]``` User service
+
+```[ w ]``` Quest service
+
+```[ w ]``` Chat Service
+
+```[ w ]``` Review Service
+
+```[  ]``` Reward Service
+
+```[  ]``` Central Logging Service
+
+```[  ]``` Monitoring Service
+
+```[  ]``` Fail over recovery plan
+
+```[  ]``` Service upgrade plan (Blue-green deployment expected)
 
 ```[  ]``` using ingress load balancer controller for production
 
