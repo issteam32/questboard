@@ -16,6 +16,10 @@ build:
     context: ChatWebSocket
     docker:
       dockerfile: Dockerfile
+  - image: review-service-image
+    context: review.service
+    docker:
+      dockerfile: Dockerfile
 deploy:
   kubectl:
     manifests:
@@ -23,6 +27,7 @@ deploy:
     - user.service/user.deployment.yaml
     - ChatWebSocket/deployment.yaml
 #    - auth.service/auth.deployment.yaml
+    - review.service/review.deployment.yaml
 portForward:
 - resourceType: service
   resourceName: demo-spring-rx
@@ -33,6 +38,9 @@ portForward:
 - resourceType: service
   resourceName: chat.service
   port: 8084
+- resourceType: service
+  resourceName: review.service
+  port: 8085
 #- resourceType: service
 #  resourceName: auth.service
 #  port: 5521
