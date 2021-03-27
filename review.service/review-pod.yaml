@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Pod
+metadata:
+  name: review-pod
+  labels:
+    app: review-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: review-pod
+  template:
+    metadata:
+      labels:
+        app: review-pod
+    spec:
+      containers:
+        - name: review-pod
+          image: review-service-image
+          ports:
+            - containerPort: 8083
+              protocol: TCP
