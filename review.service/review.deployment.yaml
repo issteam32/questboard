@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-svc
+  labels:
+    app: review-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 8083
+      targetPort: 8083
+      nodePort: 30002
+  selector:
+    app: review-deployment
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: localhost
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: localhost
+subsets:
+  - addresses:
+      - ip: 192.168.49.1
+    ports:
+      -  port: 3308
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-deployment
+  labels:
+    app: review-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: review-deployment
+  template:
+    metadata:
+      labels:
+        app: review-deployment
+    spec:
+      containers:
+        - name: review-deployment
+          image: review-service-image
+          ports:
+            - containerPort: 8083
+              protocol: TCP
