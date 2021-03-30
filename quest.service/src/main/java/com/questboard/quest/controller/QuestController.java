@@ -38,13 +38,23 @@ public class QuestController {
                 });
     }
 
-    @RequestMapping(value = "/user-quest/{userId}", method = RequestMethod.GET)
-    public Mono<List<Quest>> getQuestByUserId(@PathVariable("userId") Integer userId) {
-        return this.questService.getQuestByUserId(userId)
-                .onErrorResume(error -> {
-                    logger.error("Get users's quest error, (id {}), error: {}", userId, error.getMessage());
-                    return Mono.empty();
-                });
+    @RequestMapping(value = "/user-quest", method = RequestMethod.GET)
+    public Mono<List<Quest>> getQuestByUserId(@RequestParam("userId") Integer userId, @RequestParam("type") String type) {
+        if (type.equals("requestor")) {
+            return this.questService.getQuestByRequestor(userId)
+                    .onErrorResume(error -> {
+                        logger.error("Get users's quest error, (id {}), error: {}", userId, error.getMessage());
+                        return Mono.empty();
+                    });
+        } else if (type.equals("taker")) {
+            return this.questService.getQuestByAwardedTo(userId)
+                    .onErrorResume(error -> {
+                        logger.error("Get users's quest error, (id {}), error: {}", userId, error.getMessage());
+                        return Mono.empty();
+                    });
+        } else {
+            return Mono.empty();
+        }
     }
 
     @RequestMapping(value = "/quest", method = RequestMethod.POST)

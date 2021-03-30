@@ -1,7 +1,6 @@
 package com.questboard.quest.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.questboard.quest.dto.ConcernAnswerJson;
 import com.questboard.quest.dto.ConcernValidationJson;
 import com.questboard.quest.dto.QuestWithUserConcern;
 import com.questboard.quest.dto.SkillSetProfileDto;
@@ -22,14 +21,12 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class QuestServiceImpl implements QuestService {
+public
+class QuestServiceImpl implements QuestService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -68,14 +65,20 @@ public class QuestServiceImpl implements QuestService {
     }
 
     @Override
-    public Mono<List<Quest>> getQuestByUserId(Integer userId) {
-        return this.questRepo.findByUserId(userId)
+    public Mono<List<Quest>> getQuestByRequestor(Integer userId) {
+        return this.questRepo.findByRequestor(userId)
+                .collectList();
+    }
+
+    @Override
+    public Mono<List<Quest>> getQuestByAwardedTo(Integer userId) {
+        return this.questRepo.findByAwardedTo(userId)
                 .collectList();
     }
 
     @Override
     public Flux<Quest> getQuestByDescription(String desc) {
-        return this.questRepo.findByDescriptionCotainingIgnoreCase(desc);
+        return this.questRepo.findByDescriptionContainingIgnoreCase(desc);
     }
 
     @Override
