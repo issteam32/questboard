@@ -1,16 +1,9 @@
 package com.questboard.quest.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.questboard.quest.dto.ConcernValidationJson;
-import com.questboard.quest.dto.QuestWithUserConcern;
-import com.questboard.quest.dto.SkillSetProfileDto;
-import com.questboard.quest.entity.Location;
-import com.questboard.quest.entity.Quest;
-import com.questboard.quest.entity.QuestProposal;
-import com.questboard.quest.entity.QuestUserConcern;
-import com.questboard.quest.repository.QuestProposalRepository;
-import com.questboard.quest.repository.QuestRepository;
-import com.questboard.quest.repository.QuestUserConcernRepository;
+import com.questboard.quest.dto.*;
+import com.questboard.quest.entity.*;
+import com.questboard.quest.repository.*;
 import com.questboard.quest.service.QuestService;
 import com.questboard.quest.util.ServiceUtils;
 import org.slf4j.Logger;
@@ -21,6 +14,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +33,12 @@ class QuestServiceImpl implements QuestService {
     @Autowired
     private QuestUserConcernRepository questUserConcernRepo;
 
+    @Autowired
+    private QuestFlowRepository questFlowRepo;
+
+    @Autowired
+    private QuestRequirementRepository questReqRepo;
+
     @Override
     public Mono<Quest> getQuestById(Integer id) {
         return this.questRepo.findById(id);
@@ -56,23 +56,23 @@ class QuestServiceImpl implements QuestService {
 
     /**
      * call external recommendation service
-     * @param userId
+     * @param username
      * @return
      */
     @Override
-    public Flux<Quest> getRecommendedQuest(Integer userId) {
+    public Flux<Quest> getRecommendedQuest(String username) {
         return null;
     }
 
     @Override
-    public Mono<List<Quest>> getQuestByRequestor(Integer userId) {
-        return this.questRepo.findByRequestor(userId)
+    public Mono<List<Quest>> getQuestByRequestor(String username) {
+        return this.questRepo.findByRequestor(username)
                 .collectList();
     }
 
     @Override
-    public Mono<List<Quest>> getQuestByAwardedTo(Integer userId) {
-        return this.questRepo.findByAwardedTo(userId)
+    public Mono<List<Quest>> getQuestByAwardedTo(String username) {
+        return this.questRepo.findByAwardedTo(username)
                 .collectList();
     }
 
@@ -82,7 +82,7 @@ class QuestServiceImpl implements QuestService {
     }
 
     @Override
-    public Flux<Quest> getNearestQuest(Location location) {
+    public Flux<QuestWithLocation> getNearestQuest(Location location) {
         return null;
     }
 
@@ -194,5 +194,87 @@ class QuestServiceImpl implements QuestService {
                     return this.questProposalRepo.save(questProposal);
                 })
                 .switchIfEmpty(Mono.defer(() -> this.questProposalRepo.save(questProposal)));
+    }
+
+    @Override
+    public Mono<QuestFlow> initialNewQuestFlow(Integer questId) {
+        QuestFlow questFlow = new QuestFlow(questId, 1, "", "");
+        return this.questFlowRepo.save(questFlow);
+    }
+
+    @Override
+    public Mono<QuestFlow> updateQuestFlow(QuestFlow questFlow) {
+        return this.questFlowRepo.findById(questFlow.getId())
+                .flatMap(qf -> {
+                    if (questFlow.getRequestorRemarks() != null) {
+                        qf.setRequestorRemarks(questFlow.getRequestorRemarks());
+                    }
+                    if (questFlow.getTakerRemarks() != null) {
+                        qf.setTakerRemarks(questFlow.getTakerRemarks());
+                    }
+                    return this.questFlowRepo.save(qf);
+                });
+    }
+
+    @Override
+    public Mono<QuestFlow> markQuestFlowDone(Integer id) {
+        return questFlowRepo.findById(id)
+                .flatMap(qf -> {
+                   if (qf.getStage().equals(3)) {
+                       return Mono.just(qf);
+                   } else {
+                       qf.setStage(qf.getStage() + 1);
+                       return this.questFlowRepo.save(qf);
+                   }
+                });
+    }
+
+    @Override
+    public Flux<QuestFlow> getQuestFLow(Integer questId) {
+        return this.questFlowRepo.findByQuestId(questId);
+    }
+
+    @Override
+    public Mono<QuestRequirement> createQuestRequirement(QuestRequirement questRequirement) {
+        return this.questReqRepo.save(questRequirement);
+    }
+
+    @Override
+    public Flux<QuestRequirement> getQuestRequirements(Integer questId) {
+        return this.questReqRepo.findByQuestId(questId);
+    }
+
+    @Override
+    public Mono<QuestRequirement> updateQuestRequirement(QuestRequirement questRequirement) {
+        return this.questReqRepo.findById(questRequirement.getId())
+                .flatMap(qr -> {
+                    if (questRequirement.getRequirement() != null) {
+                        qr.setRequirement(questRequirement.getRequirement());
+                    }
+                    return this.questReqRepo.save(qr);
+                });
+    }
+
+    @Override
+    public Mono<Void> deleteQuestRequirement(Integer id) {
+        return this.questReqRepo.deleteById(id);
+    }
+
+    @Override
+    public Mono<QuestWithProposal> getQuestWithProposal(Integer questId) {
+        Mono<Quest> quest = this.questRepo.findById(questId);
+        Mono<List<QuestProposal>> questProposals = this.questProposalRepo
+                .findByQuestId(questId).collectList();
+        return quest.zipWith(questProposals)
+                .flatMap(tuple -> {
+                    Quest q = tuple.getT1();
+                    List<QuestProposal> qpList = tuple.getT2();
+                    return Mono.just(new QuestWithProposal(q, qpList));
+                });
+    }
+
+    @Override
+    public Flux<QuestProposal> getQuestProposal(String userName) {
+        return this.questProposalRepo.findByUsername(userName);
     }
 }

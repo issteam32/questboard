@@ -13,8 +13,8 @@ public class QuestProposal {
     private Integer id;
     @Column("quest_id")
     private Integer questId;
-    @Column("user_id")
-    private Integer userId;
+    @Column("username")
+    private String username;
     @Column("proposal_json")
     private String proposalJson;
     @Column("proposal_details")
@@ -29,11 +29,11 @@ public class QuestProposal {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDate;
 
-    public QuestProposal(Integer id, Integer questId, Integer userId, String proposalJson, String proposalDetails,
+    public QuestProposal(Integer id, Integer questId, String username, String proposalJson, String proposalDetails,
                          Double proposalScore, LocalDateTime createdDate, LocalDateTime updatedDate) {
         this.id = id;
         this.questId = questId;
-        this.userId = userId;
+        this.username = username;
         this.proposalJson = proposalJson;
         this.proposalDetails = proposalDetails;
         this.proposalScore = proposalScore;
@@ -60,12 +60,12 @@ public class QuestProposal {
         this.questId = questId;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getProposalJson() {

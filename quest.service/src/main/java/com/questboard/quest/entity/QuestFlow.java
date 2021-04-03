@@ -13,6 +13,9 @@ public class QuestFlow {
     private Integer id;
     @Column("quest_id")
     private Integer questId;
+    // 1 - initial
+    // 2 - woring in progress
+    // 3 - done
     @Column("stage")
     private Integer stage;
     @Column("requestor_remarks")
@@ -35,6 +38,13 @@ public class QuestFlow {
         this.takerRemarks = takerRemarks;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
+    }
+
+    public QuestFlow(Integer questId, Integer stage, String requestorRemarks, String takerRemarks) {
+        this.questId = questId;
+        this.stage = stage;
+        this.requestorRemarks = requestorRemarks;
+        this.takerRemarks = takerRemarks;
     }
 
     public QuestFlow() {

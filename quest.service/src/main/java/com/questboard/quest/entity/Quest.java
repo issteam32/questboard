@@ -7,7 +7,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
-@Table("Quest")
+@Table("quest")
 public class Quest {
     @Id
     private Integer id;
