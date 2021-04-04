@@ -3,3 +3,4 @@ target
 .DS_Store
 *.iml
 /db/
+**/quest.service/db/
