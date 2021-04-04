@@ -42,6 +42,9 @@ portForward:
 - resourceType: service
   resourceName: chat.service
   port: 8084
+- resourceType: service
+  resourceName: review.service
+  port: 8085
 #- resourceType: service
 #  resourceName: review.service
 #  port: 8085
