@@ -277,4 +277,6 @@ class QuestServiceImpl implements QuestService {
     public Flux<QuestProposal> getQuestProposal(String userName) {
         return this.questProposalRepo.findByUsername(userName);
     }
+
+
 }

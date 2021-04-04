@@ -210,8 +210,9 @@ public class QuestController {
     }
 
     @RequestMapping(value = "/quest/user-proposal", method = RequestMethod.GET)
-    public Mono<QuestWithProposal> getUserSubmittedProposal(JwtAuthenticationToken token) {
+    public Flux<QuestProposal> getUserSubmittedProposal(JwtAuthenticationToken token) {
         logger.info("toke username: {}", token.getToken().getClaims().get("preferred_username"));
-        return this.questService.getQuestWithProposal(1);
+        String username = (String)token.getToken().getClaims().get("preferred_username");
+        return this.questService.getQuestProposal(username);
     }
 }
