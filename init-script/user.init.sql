@@ -5,7 +5,6 @@ use userdb;
 create table app_user (
     id int not null auto_increment,
     username varchar(100) not null,
-    password varchar(100) not null,
     sso_uid varchar(255) null,
     email varchar(360) null,
     register_type tinyint(3) not null,
@@ -47,7 +46,7 @@ create table personal_profile (
 
 create table skillset_profile (
     id int not null auto_increment,
-    skill int not null,
+    skill varchar(255) not null,
     skill_desc text null,
     skill_endorsed int default 0,
     display tinyint default 1,
