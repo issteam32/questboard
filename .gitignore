@@ -4,3 +4,4 @@ target
 *.iml
 /db/
 **/quest.service/db/
+.env
