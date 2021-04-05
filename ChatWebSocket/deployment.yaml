@@ -55,3 +55,9 @@ spec:
         ports:
         - containerPort: 8084
           protocol: TCP
+        env:
+        - name: MONGODB_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: mongodbconnstr
