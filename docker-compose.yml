@@ -1,21 +1,21 @@
 version: '3'
 services:
-    tododb:
-        container_name: tododb
-        image: 'mariadb'
-        restart: 'on-failure'
-        command: --init-file /demo.init.sql
-        volumes:
-            - $PWD/init-script/demo.init.sql:/demo.init.sql
-        environment:              
-            MYSQL_ROOT_PASSWORD: 'password'
-            MYSQL_DATABASE: 'tododb'
-            MYSQL_USER: 'appuser'
-            MYSQL_PASSWORD: 'password'
-            MYSQL_ROOT_HOST: '%'
-        networks: ['backend']
-        ports:
-            - '3307:3306'
+#    tododb:
+#        container_name: tododb
+#        image: 'mariadb'
+#        restart: 'on-failure'
+#        command: --init-file /demo.init.sql
+#        volumes:
+#            - $PWD/init-script/demo.init.sql:/demo.init.sql
+#        environment:
+#            MYSQL_ROOT_PASSWORD: 'password'
+#            MYSQL_DATABASE: 'tododb'
+#            MYSQL_USER: 'appuser'
+#            MYSQL_PASSWORD: 'password'
+#            MYSQL_ROOT_HOST: '%'
+#        networks: ['backend']
+#        ports:
+#            - '3307:3306'
     userdb:
         container_name: userdb
         image: 'mysql'
@@ -40,6 +40,30 @@ services:
         networks: [ 'backend' ]
         ports:
             - '3308:3306'
+    questdb:
+        container_name: questdb
+        image: 'mysql'
+        restart: 'on-failure'
+        deploy:
+            resources:
+                limits:
+                    cpus: '1.0'
+                    memory: '512m'
+                reservations:
+                    cpus: '0.1'
+                    memory: '128m'
+        command: --init-file /quest.init.sql
+        volumes:
+            - $PWD/quest.service/db/quest.init.sql:/quest.init.sql
+        environment:
+            MYSQL_ROOT_PASSWORD: 'password'
+            MYSQL_DATABASE: 'questdb'
+            MYSQL_USER: 'appuser'
+            MYSQL_PASSWORD: 'password'
+            MYSQL_ROOT_HOST: '%'
+        networks: [ 'backend' ]
+        ports:
+            - '3310:3306'
     oauthdb:
         container_name: oauthdb
         image: postgres
