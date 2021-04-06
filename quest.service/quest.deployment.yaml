@@ -53,5 +53,31 @@ spec:
         - name: quest-deployment
           image: quest-service-image
           ports:
-            - containerPort: 8088
-              protocol: TCP
+          - containerPort: 8088
+            protocol: TCP
+          env:
+            - name: QUESTSVC_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: questsvc-db-secret
+                  key: questsvc_db_host
+            - name: QUESTSVC_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: questsvc-db-secret
+                  key: questsvc_db_port
+            - name: QUESTSVC_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: questsvc-db-secret
+                  key: questsvc_db_user
+            - name: QUESTSVC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: questsvc-db-secret
+                  key: questsvc_db_password
+            - name: QUESTSVC_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: questsvc-db-secret
+                  key: questsvc_db_database

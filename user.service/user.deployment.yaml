@@ -53,5 +53,31 @@ spec:
         - name: user-deployment
           image: user-service-image
           ports:
-            - containerPort: 8083
-              protocol: TCP
+          - containerPort: 8083
+            protocol: TCP
+          env:
+            - name: USERSVC_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: usersvc_db_host
+            - name: USERSVC_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: usersvc_db_port
+            - name: USERSVC_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: usersvc_db_user
+            - name: USERSVC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: usersvc_db_password
+            - name: USERSVC_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: usersvc_db_database
