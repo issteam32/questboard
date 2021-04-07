@@ -11,13 +11,15 @@ public interface ReviewService {
 
     public Flux<Review> getAllReview();
 
+    public Mono<Review> getReviewById(int id);
+
     public Flux<Review> getReviewByQuestId(Integer quest_id, Pageable paging);
 
-    public Flux<Review> getReviewByQuestTakerId(Integer questaker_id, Pageable paging);
+    public Flux<Review> getReviewByQuestTaker(String quest_taker, Pageable paging);
 
     public Mono<Review> createReview(final Review review);
 
-    public Mono<Review> updateReview(final Review review);
+    public Mono<Review> updateReview(int id, Review review);
 
-    public Mono<Void> deleteReview(final int id);
+    public Mono<Void> deleteReview(int id);
 }
