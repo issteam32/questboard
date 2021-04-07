@@ -6,11 +6,11 @@ services:
   - docker
 cache:
   directories:
-    - docker_images
+    - $HOME/.m2
 before_install:
-  - docker load -i docker_images/images.tar || true
-before_cache:
-  - docker save -o docker_images/images.tar $(docker images -a -q)
+  - docker pull openjdk:11
+  - chmod +x ./travis-build.sh
+  - chmod +x ./travis-deploy.sh
 script:
   - ./travis-build.sh
 after_success:
