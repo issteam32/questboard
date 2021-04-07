@@ -14,7 +14,7 @@ docker build -t issteam32/quest-service -f Dockerfile.prod .
 cd -
 
 ./init-script/chat-service-build.sh
-cd ./ChatWebsocket/
+cd ./ChatWebSocket/
 docker build -t issteam32/chat-service -f Dockerfile.prod .
 
 cd -
