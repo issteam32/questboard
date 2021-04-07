@@ -5,10 +5,18 @@ echo -e "[DEPLOY-MESSAGE] --- running travis build ---"
 cd ./user.service
 docker build -t issteam32/user-service -f Dockerfile.prod .
 
-#./init-script/quest-service-build.sh
-#docker build -t issteam32/quest-service -f ./quest.service/Dockerfile .
-#
-#./init-script/chat-service-build.sh
-#docker build -t issteam32/chat-service -f ./ChatWebsocket/Dockerfile .
+cd -
+
+./init-script/quest-service-build.sh
+cd ./quest.service/
+docker build -t issteam32/quest-service -f Dockerfile.prod .
+
+cd -
+
+./init-script/chat-service-build.sh
+cd ./ChatWebsocket/
+docker build -t issteam32/chat-service -f Dockerfile.prod .
+
+cd -
 
 echo -e "[DEPLOY-MESSAGE] --- done ---"
