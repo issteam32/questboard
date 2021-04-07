@@ -4,8 +4,13 @@ jdk:
   - openjdk11
 services:
   - docker
+cache:
+  directories:
+    - docker_images
 before_install:
-  - docker pull openjdk:11
+  - docker load -i docker_images/images.tar || true
+before_cache:
+  - docker save -o docker_images/images.tar $(docker images -a -q)
 script:
   - ./travis-build.sh
 after_success:
