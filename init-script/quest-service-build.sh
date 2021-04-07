@@ -4,11 +4,14 @@ Color_Off='\033[0m'
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- setting temporary env value ---"
 
-export QUESTSVC_DB_HOST=mysql-questdb
-export QUESTSVC_DB_PORT=3306
-export QUESTSVC_DB_USER=appuser
-export QUESTSVC_DB_PASSWORD=password
-export QUESTSVC_DB_DATABASE=questdb
+if [ $1 == "local-build" ]
+then
+  export QUESTSVC_DB_HOST=mysql-questdb
+  export QUESTSVC_DB_PORT=3306
+  export QUESTSVC_DB_USER=appuser
+  export QUESTSVC_DB_PASSWORD=password
+  export QUESTSVC_DB_DATABASE=questdb
+fi
 
 cd $PWD/quest.service
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- building quest service ---"
@@ -23,10 +26,13 @@ fi
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- remove temporary env value ---"
 
-unset QUESTSVC_DB_HOST
-unset QUESTSVC_DB_PORT
-unset QUESTSVC_DB_USER
-unset QUESTSVC_DB_PASSWORD
-unset QUESTSVC_DB_DATABASE
+if [ $1 == "local-build" ]
+then
+  unset QUESTSVC_DB_HOST
+  unset QUESTSVC_DB_PORT
+  unset QUESTSVC_DB_USER
+  unset QUESTSVC_DB_PASSWORD
+  unset QUESTSVC_DB_DATABASE
+fi
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- quest service built success ---"

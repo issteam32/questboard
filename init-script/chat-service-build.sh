@@ -4,7 +4,10 @@ Color_Off='\033[0m'
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- setting temporary env value ---"
 
-export MONGODB_CONNECTION_STRING=
+if [ $1 == "local-build" ]
+then
+  export MONGODB_CONNECTION_STRING=
+fi
 
 cd $PWD/ChatWebSocket
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- building chat service ---"
@@ -19,6 +22,9 @@ fi
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- remove temporary env value ---"
 
-unset MONGODB_CONNECTION_STRING
+if [ $1 == "local-build" ]
+then
+  unset MONGODB_CONNECTION_STRING
+fi
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- chat service built success ---"
