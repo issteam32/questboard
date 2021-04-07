@@ -2,7 +2,8 @@
 echo -e "[DEPLOY-MESSAGE] --- running travis build ---"
 
 ./init-script/user-service-build.sh
-docker build -t issteam32/user-service -f ./user.service/Dockerfile.prod .
+cd ./user.service
+docker build -t issteam32/user-service -f Dockerfile.prod .
 
 #./init-script/quest-service-build.sh
 #docker build -t issteam32/quest-service -f ./quest.service/Dockerfile .
