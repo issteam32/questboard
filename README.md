@@ -235,6 +235,22 @@ To keep keycloak data running locally, remember to create a folder named "db" in
 Then, run ```docker-compose up``` it shoould start up all the db and keycloak
 
 ---------------------------------------------------------------------
+Chat Service
+
+For chat service to work properly, you need to set secret in kubernetes.
+
+The secret will be as following:
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+type: Opaque
+data:
+  # base64format of mongodb_connection_string
+```
+
+---------------------------------------------------------------------
 TODO:
 
 w - in progress
@@ -245,13 +261,13 @@ d - done
 
 ```[ d ]``` User service
 
-```[ w ]``` Quest service
+```[ d ]``` Quest service
 
-```[ w ]``` Chat Service
+```[ d ]``` Chat Service
 
-```[ w ]``` Review Service
+```[ d ]``` Review Service
 
-```[  ]``` Reward Service
+```[ w ]``` Reward Service
 
 ```[  ]``` Central Logging Service
 
@@ -261,10 +277,10 @@ d - done
 
 ```[  ]``` Service upgrade plan (Blue-green deployment expected)
 
-```[  ]``` using ingress load balancer controller for production
+```[ w ]``` using ingress load balancer controller for production
 
 ```[  ]``` pub sub service
 
-```[  ]``` travis pipeline
+```[ w ]``` travis pipeline
 
-```[  ]``` cloud artifact location
+```[ w ]``` cloud artifact location
