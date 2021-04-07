@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -73,11 +74,12 @@ public class UserController {
     }
 
     @RequestMapping(value = "/user/{id}", method = RequestMethod.GET)
-    public Mono<ResponseEntity<RespBody<User>>> getUserById(@PathVariable("id") Integer id) {
-        return this.userServiceImpl.getUserById(id)
+    public Mono<ResponseEntity<RespBody<User>>> getUserById(JwtAuthenticationToken jwtToken) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userServiceImpl.getUserByUserName(username)
                 .map(user -> ResponseEntity.ok(RespBody.body(user)))
                 .onErrorResume(error -> {
-                    logger.error("Error occur when getting user with id" + id);
+                    logger.error("Error occur when getting user with id" + username);
                     logger.error(error.getMessage());
                     return Mono.just(ResponseEntity.status(404)
                         .body(new RespBody<>("User not found")));
