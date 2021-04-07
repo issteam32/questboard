@@ -35,28 +35,27 @@ public class ReviewController {
         return ResponseEntity.ok(this.service.getReviewByQuestId(id, PageRequest.of(pageNo, pageSize)));
     }
 
-    // http://url/api/review/questtaker?id=X&pageSize=X&pageNo=X
+    // http://url/api/review/questtaker?name=X&pageSize=X&pageNo=X
     @GetMapping(value = "/questtaker")
-    public ResponseEntity<Flux<Review>> getByQuestTaker(@RequestParam Integer id,
+    public ResponseEntity<Flux<Review>> getByQuestTaker(@RequestParam String name,
                                                         @RequestParam(defaultValue = "10", required = false) Integer pageSize,
                                                         @RequestParam(defaultValue = "0", required = false) Integer pageNo) {
 
-        return ResponseEntity.ok(this.service.getReviewByQuestTakerId(id, PageRequest.of(pageNo, pageSize)));
+        return ResponseEntity.ok(this.service.getReviewByQuestTaker(name, PageRequest.of(pageNo, pageSize)));
     }
 
     @PostMapping()
     public ResponseEntity<Mono<Review>> createReview(@RequestBody Review review) {
-        System.out.println(review);
         if (service.isValid(review)) {
             return ResponseEntity.ok(this.service.createReview(review));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
-    @PutMapping()
-    public ResponseEntity<Mono<Review>> updateReview(@RequestBody Review review) {
-        if (service.isValid(review)) {
-            return ResponseEntity.ok(this.service.updateReview(review));
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<Mono<Review>> updateReview(@PathVariable("id") Integer id, @RequestBody Review review) {
+        if (id > 0 ) {
+            return ResponseEntity.ok(this.service.updateReview(id, review));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
