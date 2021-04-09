@@ -25,6 +25,11 @@ public class ChatController {
     @Autowired
     private ChatRoomService chatRoomService;
 
+    @GetMapping("/")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessage chatMessage) {
         String chatId = chatRoomService
