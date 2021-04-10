@@ -21,6 +21,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 )
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt ->
-                                jwt.jwkSetUri("http://192.168.49.1:8090/auth/realms/Questboard/protocol/openid-connect/certs")));
+                                jwt.jwkSetUri("keycloak-cluster-ip-svc/auth/realms/Questboard/protocol/openid-connect/certs")));
+//                                jwt.jwkSetUri("http://192.168.49.1:8090/auth/realms/Questboard/protocol/openid-connect/certs")));
     }
 }
