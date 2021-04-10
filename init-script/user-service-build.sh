@@ -10,6 +10,7 @@ then
   export USERSVC_DB_USER=appuser
   export USERSVC_DB_PASSWORD=password
   export USERSVC_DB_DATABASE=userdb
+  export OAUTH2SERVER_JWKURI=http://192.168.49.1:8090/auth/realms/Questboard/protocol/openid-connect/certs
 fi
 
 cd $PWD/user.service
@@ -31,6 +32,7 @@ then
   unset USERSVC_DB_USER
   unset USERSVC_DB_PASSWORD
   unset USERSVC_DB_DATABASE
+  unset OAUTH2SERVER_JWKURI
 fi
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- user service built success ---"
