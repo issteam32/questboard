@@ -4,6 +4,9 @@ jdk:
   - openjdk11
 services:
   - docker
+env:
+  global:
+    - GIT_SHA=$(git rev-parse HEAD)
 cache:
   directories:
     - $HOME/.m2

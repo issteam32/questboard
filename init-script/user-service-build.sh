@@ -11,6 +11,10 @@ then
   export USERSVC_DB_PASSWORD=password
   export USERSVC_DB_DATABASE=userdb
   export OAUTH2SERVER_JWKURI=http://192.168.49.1:8090/auth/realms/Questboard/protocol/openid-connect/certs
+  export KEYCLOAK_URI=http://192.168.49.1:8090/auth
+  export KEYCLOAK_REALM=Questboard
+  export KEYCLOAK_ADMIN_USERNAME=admin
+  export KEYCLOAK_ADMIN_PASSWORD=password
 fi
 
 cd $PWD/user.service
@@ -33,6 +37,10 @@ then
   unset USERSVC_DB_PASSWORD
   unset USERSVC_DB_DATABASE
   unset OAUTH2SERVER_JWKURI
+  unset KEYCLOAK_URI
+  unset KEYCLOAK_REALM
+  unset KEYCLOAK_ADMIN_USERNAME
+  unset KEYCLOAK_ADMIN_PASSWORD
 fi
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- user service built success ---"
