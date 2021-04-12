@@ -6,5 +6,7 @@ docker push $DOCKER_REPO/quest-service:$GIT_SHA
 docker push $DOCKER_REPO/chat-service:latest
 docker push $DOCKER_REPO/chat-service:$GIT_SHA
 
-echo "SHA value\n"
+echo "#########################################"
+echo "SHA value"
+echo "#########################################"
 echo $GIT_SHA

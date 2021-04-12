@@ -11,6 +11,7 @@ then
   export QUESTSVC_DB_USER=appuser
   export QUESTSVC_DB_PASSWORD=password
   export QUESTSVC_DB_DATABASE=questdb
+  export OAUTH2SERVER_JWKURI=http://192.168.49.1:8090/auth/realms/Questboard/protocol/openid-connect/certs
 fi
 
 cd $PWD/quest.service
@@ -32,6 +33,7 @@ then
   unset QUESTSVC_DB_USER
   unset QUESTSVC_DB_PASSWORD
   unset QUESTSVC_DB_DATABASE
+  unset OAUTH2SERVER_JWKURI
 fi
 
 echo -e "[${BYellow}BUILD-MESSAGE${Color_Off}] --- quest service built success ---"

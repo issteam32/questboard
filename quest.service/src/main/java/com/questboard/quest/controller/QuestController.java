@@ -36,6 +36,11 @@ public class QuestController {
     @Autowired
     private QuestService questService;
 
+    @GetMapping("/")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
     @RequestMapping(value = "/quest/{id}", method = RequestMethod.GET)
     public Mono<Quest> getQuestById(@PathVariable("id") Integer id) {
         return this.questService.getQuestById(id)
