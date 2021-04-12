@@ -19,6 +19,12 @@ docker build -t issteam32/chat-service:latest -t issteam32/chat-service:$GIT_SHA
 
 cd -
 
+./init-script/review-service-build.sh
+cd ./review.service/
+docker build -t issteam32/review-service:latest -t issteam32/review-service:$GIT_SHA -f Dockerfile.prod .
+
+cd -
+
 echo "SHA value\n"
 echo $GIT_SHA
 
