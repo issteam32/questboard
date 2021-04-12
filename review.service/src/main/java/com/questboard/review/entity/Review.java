@@ -1,8 +1,10 @@
 package com.questboard.review.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
@@ -12,24 +14,33 @@ import java.time.LocalDateTime;
 public class Review {
     @Id
     private Integer id;
-    private Integer quest_id;
+    @Column("quest_id")
+    private Integer questId;
+    @Column("reviewer")
     private String reviewer;
-    private String quest_taker;
-    private String review_msg;
-    private LocalDateTime created_date;
-    private LocalDateTime updated_date;
+    @Column("quest_taker")
+    private String questTaker;
+    @Column("review_msg")
+    private String reviewMsg;
+    @Column("created_date")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdDate;
+
+    @Column("updated_date")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedDate;
 
     public Review() {
     }
 
-    public Review(Integer id, Integer quest_id, String reviewer, String quest_taker, String review_msg, LocalDateTime created_date, LocalDateTime updated_date) {
+    public Review(Integer id, Integer questId, String reviewer, String questTaker, String reviewMsg, LocalDateTime created_date, LocalDateTime updated_date) {
         this.id = id;
-        this.quest_id = quest_id;
+        this.questId = questId;
         this.reviewer = reviewer;
-        this.quest_taker = quest_taker;
-        this.review_msg = review_msg;
-        this.created_date = created_date;
-        this.updated_date = updated_date;
+        this.questTaker = questTaker;
+        this.reviewMsg = reviewMsg;
+        this.createdDate = created_date;
+        this.updatedDate = updated_date;
     }
 
     public Integer getId() {
@@ -40,12 +51,12 @@ public class Review {
         this.id = id;
     }
 
-    public Integer getQuest_id() {
-        return quest_id;
+    public Integer getQuestId() {
+        return questId;
     }
 
-    public void setQuest_id(Integer quest_id) {
-        this.quest_id = quest_id;
+    public void setQuestId(Integer questId) {
+        this.questId = questId;
     }
 
     public String getReviewer() {
@@ -56,48 +67,48 @@ public class Review {
         this.reviewer = reviewer;
     }
 
-    public String getQuest_taker() {
-        return quest_taker;
+    public String getQuestTaker() {
+        return questTaker;
     }
 
-    public void setQuest_taker(String quest_taker) {
-        this.quest_taker = quest_taker;
+    public void setQuestTaker(String questTaker) {
+        this.questTaker = questTaker;
     }
 
-    public String getReview_msg() {
-        return review_msg;
+    public String getReviewMsg() {
+        return reviewMsg;
     }
 
-    public void setReview_msg(String review_msg) {
-        this.review_msg = review_msg;
+    public void setReviewMsg(String reviewMsg) {
+        this.reviewMsg = reviewMsg;
     }
 
     public LocalDateTime getCreated_date() {
-        return created_date;
+        return createdDate;
     }
 
     public void setCreated_date(LocalDateTime created_date) {
-        this.created_date = created_date;
+        this.createdDate = created_date;
     }
 
     public LocalDateTime getUpdated_date() {
-        return updated_date;
+        return updatedDate;
     }
 
     public void setUpdated_date(LocalDateTime updated_date) {
-        this.updated_date = updated_date;
+        this.updatedDate = updated_date;
     }
 
     @Override
     public String toString() {
         return "ReviewEntity{" +
                 "id=" + id +
-                ", quest_id=" + quest_id +
+                ", quest_id=" + questId +
                 ", reviewer=" + reviewer +
-                ", quest_taker=" + quest_taker +
-                ", review_msg=" + review_msg +
-                ", created_date=" + created_date +
-                ", updated_date=" + updated_date +
+                ", quest_taker=" + questTaker +
+                ", review_msg=" + reviewMsg +
+                ", created_date=" + createdDate +
+                ", updated_date=" + updatedDate +
                 '}';
     }
 }

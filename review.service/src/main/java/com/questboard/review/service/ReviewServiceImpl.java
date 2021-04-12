@@ -17,7 +17,7 @@ public class ReviewServiceImpl implements ReviewService{
     private ReviewRepository reviewRepository;
 
     public Boolean isValid(final Review review) {
-        return review != null && review.getQuest_id() != null && review.getReviewer() != null && review.getQuest_taker() != null && !review.getReview_msg().isEmpty();
+        return review != null && review.getQuestId() != null && review.getReviewer() != null && review.getQuestTaker() != null && !review.getReviewMsg().isEmpty();
     }
 
     public Flux<Review> getAllReview() {
@@ -30,12 +30,12 @@ public class ReviewServiceImpl implements ReviewService{
 
     public Flux<Review> getReviewByQuestId(Integer quest_id, Pageable paging) {
 
-        return this.reviewRepository.findByQuestid(quest_id, paging);
+        return this.reviewRepository.findByQuestId(quest_id, paging);
     }
 
     public Flux<Review> getReviewByQuestTaker(String quest_taker, Pageable paging) {
 
-        return this.reviewRepository.findByQuesttaker(quest_taker, paging);
+        return this.reviewRepository.findByQuestTaker(quest_taker, paging);
     }
 
     @Transactional
@@ -48,7 +48,7 @@ public class ReviewServiceImpl implements ReviewService{
         return this.reviewRepository.findById(id)
                 .flatMap(r -> {
                     if(r != null && r.getReviewer() == review.getReviewer()){
-                        r.setReview_msg(review.getReview_msg());
+                        r.setReviewMsg(review.getReviewMsg());
                     }
                     return this.reviewRepository.save(r);
                 })

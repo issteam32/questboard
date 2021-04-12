@@ -25,13 +25,13 @@ public class R2DBCConfig extends AbstractR2dbcConfiguration {
     @Bean
     public ConnectionFactory connectionFactory() {
         try {
-            System.out.println("################## user env variable ###################");
+            System.out.println("################## review env variable ###################");
             System.out.println(env.getProperty("REVIEWSVC_DB_HOST"));
             System.out.println(env.getProperty("REVIEWSVC_DB_PORT"));
             System.out.println(env.getProperty("REVIEWSVC_DB_USER"));
             System.out.println(env.getProperty("REVIEWSVC_DB_PASSWORD"));
             System.out.println(env.getProperty("REVIEWSVC_DB_DATABASE"));
-            System.out.println("################## user env variable ###################");
+            System.out.println("################## review env variable ###################");
             return ConnectionFactories.get(ConnectionFactoryOptions.builder()
                     .option(DRIVER, "pool")
                     .option(PROTOCOL, "mysql")

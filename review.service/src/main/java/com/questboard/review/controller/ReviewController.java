@@ -21,7 +21,12 @@ public class ReviewController {
     @Autowired
     private ReviewService service;
 
-    @GetMapping()
+    @GetMapping("/")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
+    @GetMapping("/quest-reviews")
     public ResponseEntity<Flux<Review>> getAllReview() {
         return ResponseEntity.ok(this.service.getAllReview());
     }
