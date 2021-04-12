@@ -63,14 +63,8 @@ public class KeycloakRestService {
     @Value("${keycloak.logout}")
     private String keycloakLogout;
 
-    @Value("${keycloak.client-id}")
-    private String clientId;
-
     @Value("${keycloak.authorization-grant-type}")
     private String grantType;
-
-    @Value("${keycloak.client-secret}")
-    private String clientSecret;
 
     @Value("${keycloak.scope}")
     private String scope;
@@ -96,6 +90,8 @@ public class KeycloakRestService {
      * @return access_token
      */
     public Mono<String> login(String username, String password) {
+        String clientId = env.getProperty("KEYCLOAK_CLIENT_ID");
+        String clientSecret = env.getProperty("KEYCLOAK_CLIENT_SECRET");
         MultiValueMap<String, String> formMap = new LinkedMultiValueMap<>();
         formMap.add("username", username);
         formMap.add("password", password);
@@ -127,6 +123,8 @@ public class KeycloakRestService {
             String superUser = env.getProperty("KEYCLOAK_ADMIN_USERNAME");
             String superPassword = env.getProperty("KEYCLOAK_ADMIN_PASSWORD");
             String adminCliClientId = "admin-cli";
+            String clientId = env.getProperty("KEYCLOAK_CLIENT_ID");
+            String clientSecret = env.getProperty("KEYCLOAK_CLIENT_SECRET");
             Keycloak keycloak = KeycloakBuilder.builder().serverUrl(keycloakServerUri)
                     .realm(realm)
                     .username(username)

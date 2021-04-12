@@ -2,5 +2,7 @@ FROM openjdk:11
 VOLUME /tmp
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} app.jar
+USER root
+RUN cd $JAVA_HOME/lib/security && echo -n | openssl s_client -connect auth.questsbot.xyz:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > auth.questsbot.xyz.crt &&  keytool -keystore cacerts -keypass changeit -storepass changeit -noprompt -import -v -trustcacerts -alias auth.questsbot.xyz -file auth.questsbot.xyz.crt
 EXPOSE 8083
 ENTRYPOINT ["java","-jar","/app.jar"]

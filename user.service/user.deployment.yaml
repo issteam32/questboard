@@ -81,3 +81,38 @@ spec:
                 secretKeyRef:
                   name: usersvc-db-secret
                   key: usersvc_db_database
+            - name: OAUTH2SERVER_JWKURI
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: oauth2server_jwkuri
+            - name: KEYCLOAK_URI
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: keycloak_uri
+            - name: KEYCLOAK_REALM
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: keycloak_realm
+            - name: KEYCLOAK_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: keycloak_admin_username
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: keycloak_admin_password
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: keycloak_client_id
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: usersvc-db-secret
+                  key: keycloak_client_secret

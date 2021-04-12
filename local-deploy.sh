@@ -5,13 +5,13 @@ Color_Off='\033[0m'
 if [ $1 == "skip-test" ]
 then
   ./init-script/user-service-build.sh skip-test
-  ./init-script/quest-service-build.sh skip-test
-  ./init-script/chat-service-build.sh skip-test
+#  ./init-script/quest-service-build.sh skip-test
+#  ./init-script/chat-service-build.sh skip-test
 #  ./init-script/demo-service-build.sh skip-test
 else
   ./init-script/user-service-build.sh local-build
-  ./init-script/quest-service-build.sh local-build
-  ./init-script/chat-service-build.sh local-build
+#  ./init-script/quest-service-build.sh local-build
+#  ./init-script/chat-service-build.sh local-build
 #  ./init-script/demo-service-build.sh
 fi
 
