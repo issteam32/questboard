@@ -61,3 +61,8 @@ spec:
             secretKeyRef:
               name: chatsvc-db-secret
               key: mongodbconnstr
+        - name: OAUTH2SERVER_JWKURI
+          valueFrom:
+            secretKeyRef:
+              name: usersvc-db-secret
+              key: oauth2server_jwkuri

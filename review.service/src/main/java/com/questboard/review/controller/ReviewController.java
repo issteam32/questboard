@@ -21,7 +21,7 @@ public class ReviewController {
     @Autowired
     private ReviewService service;
 
-    @GetMapping("/")
+    @GetMapping("/health-check")
     public ResponseEntity<String> redinessCheck() {
         return ResponseEntity.status(200).body("Ok");
     }

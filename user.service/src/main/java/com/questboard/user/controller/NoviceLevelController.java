@@ -25,6 +25,11 @@ public class NoviceLevelController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
     @RequestMapping(value = "/novicelvl/{userId}", method = RequestMethod.GET)
     public Mono<NoviceLevel> getUserNoviceLevel(@PathVariable("userId") Integer userId) {
         return this.noviceLevelService.getUserNoviceLevel(userId)

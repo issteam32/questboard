@@ -39,6 +39,11 @@ public class UserController {
     @Autowired
     private SocialAccountService socialAccountService;
 
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     public ResponseEntity<Flux<User>> getUsers() {
         return ResponseEntity.ok(this.userServiceImpl.getUsers());

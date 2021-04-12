@@ -25,7 +25,7 @@ public class ChatController {
     @Autowired
     private ChatRoomService chatRoomService;
 
-    @GetMapping("/")
+    @GetMapping("/health-check")
     public ResponseEntity<String> redinessCheck() {
         return ResponseEntity.status(200).body("Ok");
     }

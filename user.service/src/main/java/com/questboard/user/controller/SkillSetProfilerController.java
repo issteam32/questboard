@@ -30,6 +30,11 @@ public class SkillSetProfilerController {
     @Autowired
     private ProfessionalLevelService professionalLevelService;
 
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
     @RequestMapping(value = "/user-skillset-profile/{id}", method = RequestMethod.GET)
     public Flux<SkillSetProfileAndLevelDto> getUserSkillSetProfile(@PathVariable("id") Integer userId) {
         return this.skillSetProfileService.getUserSkillSetProfiles(userId)

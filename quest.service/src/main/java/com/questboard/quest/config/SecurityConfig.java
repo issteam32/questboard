@@ -24,7 +24,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         System.out.println("################## user env variable ###################");
         http.cors()
                 .and()
-                .authorizeRequests(authorize -> authorize.anyRequest().authenticated())
+                .authorizeRequests(authorize -> authorize
+                        .antMatchers("/api/q/v1/health-check").permitAll()
+                        .antMatchers("/api/**").authenticated()
+                )
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt ->
                                 jwt.jwkSetUri(jwkSetUri)));

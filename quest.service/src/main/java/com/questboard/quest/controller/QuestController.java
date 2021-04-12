@@ -36,7 +36,7 @@ public class QuestController {
     @Autowired
     private QuestService questService;
 
-    @GetMapping("/")
+    @GetMapping("/health-check")
     public ResponseEntity<String> redinessCheck() {
         return ResponseEntity.status(200).body("Ok");
     }

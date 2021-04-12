@@ -27,6 +27,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests(authorize -> authorize
                         .antMatchers("/api/u/v1/user/register").permitAll()
                         .antMatchers("/api/u/v1/user/login").permitAll()
+                        .antMatchers("/api/u/v1/health-check").permitAll()
+                        .antMatchers("/api/plv/v1/health-check").permitAll()
+                        .antMatchers("/api/nlv/v1/health-check").permitAll()
+                        .antMatchers("/api/ssp/v1/health-check").permitAll()
                         .antMatchers("/api/**").authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->
