@@ -137,11 +137,11 @@ public class KeycloakRestService {
         } catch (NotAuthorizedException err) {
             logger.error("Unauthorized access: " + err.getMessage());
             err.printStackTrace();
-            return Mono.error(err);
+            return Mono.empty();
         } catch (Exception err) {
             logger.error("Unexpected error when login: " + err.getMessage());
             err.printStackTrace();
-            return Mono.error(err);
+            return Mono.empty();
         }
     }
 

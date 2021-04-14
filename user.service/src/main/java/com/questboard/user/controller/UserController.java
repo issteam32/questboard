@@ -50,13 +50,11 @@ public class UserController {
     }
 
     @RequestMapping(value = "/user/login", method = RequestMethod.POST)
-    public Mono<ResponseEntity<String>> login(@RequestBody UserLoginDto userLoginDto) {
+    public Mono<ResponseEntity<AccessTokenResponse>> login(@RequestBody UserLoginDto userLoginDto) {
             return this.keycloakRestService.loginSecure(userLoginDto.username, userLoginDto.password)
-                    .map(accessTokenResponse -> ResponseEntity.ok(accessTokenResponse.toString()))
-                    .onErrorResume(error -> Mono.just(ResponseEntity
-                            .status(HttpStatus.UNAUTHORIZED)
-                            .body("Unauthorized access"))
-                            );
+                    .map(ResponseEntity::ok)
+                    .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null)));
+//                    .onErrorResume(error -> ResponseEntity.status(HttpStatus.UNAUTHORIZED));
     }
 
     @RequestMapping(value = "/user/register", method = RequestMethod.POST)
