@@ -3,6 +3,7 @@ package com.questboard.user.controller;
 import com.questboard.user.dto.SkillSetProfileAndLevelDto;
 import com.questboard.user.entity.SkillSetProfile;
 import com.questboard.user.entity.User;
+import com.questboard.user.enums.Skill;
 import com.questboard.user.response.RespBody;
 import com.questboard.user.service.ProfessionalLevelService;
 import com.questboard.user.service.SkillSetProfileService;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -134,6 +137,16 @@ public class SkillSetProfilerController {
     @RequestMapping(value = "/skillset-profile/{id}", method = RequestMethod.DELETE)
     public Mono<Void> deletedSkillSetProfileById(@PathVariable("id") Integer id) {
         return this.skillSetProfileService.deleteSkillSetProfileById(id);
+    }
+
+    @RequestMapping(value = "/list-of-skill", method = RequestMethod.GET)
+    public Mono<List<String>> getListOfAvailableSkills() {
+        Skill[] possibleValues = Skill.values();
+        List<String> skillList = new ArrayList<>();
+        for (Skill skill: possibleValues) {
+            skillList.add(skill.label);
+        }
+        return Mono.just(skillList);
     }
 
 }
