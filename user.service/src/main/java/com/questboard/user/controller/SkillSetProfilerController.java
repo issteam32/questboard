@@ -75,9 +75,7 @@ public class SkillSetProfilerController {
         return this.userService.getUserByUserName(username)
                 .flatMap(user -> {
                     SkillSetProfile skillSetProfile = new SkillSetProfile();
-                    if (param.containsKey("userId")) {
-                        skillSetProfile.setUserId(user.getId());
-                    }
+                    skillSetProfile.setUserId(user.getId());
                     if (param.containsKey("skill")) {
                         skillSetProfile.setSkill(param.get("skill"));
                     }
