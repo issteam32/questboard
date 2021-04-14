@@ -6,11 +6,13 @@ import com.questboard.user.entity.User;
 import com.questboard.user.response.RespBody;
 import com.questboard.user.service.ProfessionalLevelService;
 import com.questboard.user.service.SkillSetProfileService;
+import com.questboard.user.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,6 +31,9 @@ public class SkillSetProfilerController {
 
     @Autowired
     private ProfessionalLevelService professionalLevelService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/health-check")
     public ResponseEntity<String> redinessCheck() {
@@ -61,19 +66,23 @@ public class SkillSetProfilerController {
     }
 
     @RequestMapping(value = "/user-skillset-profile", method = RequestMethod.POST)
-    public Mono<SkillSetProfile> createUserSkillSetProfile(@RequestBody HashMap<String, String> param) {
-        SkillSetProfile skillSetProfile = new SkillSetProfile();
-        if (param.containsKey("userId")) {
-            skillSetProfile.setUserId(Integer.parseInt(param.get("userId")));
-        }
-        if (param.containsKey("skill")) {
-            skillSetProfile.setSkill(param.get("skill"));
-        }
-        if (param.containsKey("skillDesc")) {
-            skillSetProfile.setSkillDesc(param.get("skillDesc"));
-        }
-        return this.skillSetProfileService.createSkillSetProfile(skillSetProfile)
-                .map(ssp -> ssp)
+    public Mono<SkillSetProfile> createUserSkillSetProfile(JwtAuthenticationToken jwtToken,
+                                                           @RequestBody HashMap<String, String> param) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userService.getUserByUserName(username)
+                .flatMap(user -> {
+                    SkillSetProfile skillSetProfile = new SkillSetProfile();
+                    if (param.containsKey("userId")) {
+                        skillSetProfile.setUserId(user.getId());
+                    }
+                    if (param.containsKey("skill")) {
+                        skillSetProfile.setSkill(param.get("skill"));
+                    }
+                    if (param.containsKey("skillDesc")) {
+                        skillSetProfile.setSkillDesc(param.get("skillDesc"));
+                    }
+                    return this.skillSetProfileService.createSkillSetProfile(skillSetProfile);
+                })
                 .onErrorResume(error -> {
                     logger.error("Error when getting user(id:{}), error: {}", param.get("userId"), error.getMessage());
                     return Mono.error(new Error(error.getMessage()));

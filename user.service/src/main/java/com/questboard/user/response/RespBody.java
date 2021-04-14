@@ -26,11 +26,11 @@ public class RespBody<T> {
 
     public RespBody(T data) {
         this.data = data;
-        this.error = "";
-        this.errorCount = 0;
-        this.success = true;
-        this.responseTime = new Date().getTime();
-        this.required = new ArrayList<>();
+//        this.error = "";
+//        this.errorCount = 0;
+//        this.success = true;
+//        this.responseTime = new Date().getTime();
+//        this.required = new ArrayList<>();
     }
 
     public RespBody(T data, String[] required) {
@@ -136,5 +136,9 @@ public class RespBody<T> {
     }
 
     public void end() {
+    }
+
+    public T getData() {
+        return this.data;
     }
 }
