@@ -138,13 +138,15 @@ public class SkillSetProfilerController {
     }
 
     @RequestMapping(value = "/list-of-skill", method = RequestMethod.GET)
-    public Mono<List<String>> getListOfAvailableSkills() {
+    public Mono<Map<String, List<String>>> getListOfAvailableSkills() {
         Skill[] possibleValues = Skill.values();
         List<String> skillList = new ArrayList<>();
         for (Skill skill: possibleValues) {
             skillList.add(skill.label);
         }
-        return Mono.just(skillList);
+        HashMap <String, List<String>> skillListJSON = new HashMap<>();
+        skillListJSON.put("skills", skillList);
+        return Mono.just(skillListJSON);
     }
 
 }
