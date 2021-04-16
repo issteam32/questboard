@@ -42,6 +42,16 @@ public class NoviceLevelController {
                 });
     }
 
+    @RequestMapping(value = "/user-novicelvl/{userId}", method = RequestMethod.GET)
+    public Mono<NoviceLevel> getUserNoviceLevel(@PathVariable("userId") Integer userId) {
+        return this.noviceLevelService.getUserNoviceLevel(userId)
+                .onErrorResume(error -> {
+                    logger.error("Unable to retrive user (id: {}) novice level, error: {}", userId  , error.getMessage());
+                    return Mono.error(new Error(error.getMessage()));
+                });
+    }
+
+
     @RequestMapping(value = "/novicelvl", method = RequestMethod.POST)
     public Mono<NoviceLevel> createUserNoviceLevelProfile(JwtAuthenticationToken jwtToken) {
         String username = (String)jwtToken.getToken().getClaims().get("preferred_username");

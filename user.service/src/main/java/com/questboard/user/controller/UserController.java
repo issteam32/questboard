@@ -44,10 +44,10 @@ public class UserController {
         return ResponseEntity.status(200).body("Ok");
     }
 
-    @RequestMapping(value = "/user", method = RequestMethod.GET)
-    public ResponseEntity<Flux<User>> getUsers() {
-        return ResponseEntity.ok(this.userServiceImpl.getUsers());
-    }
+//    @RequestMapping(value = "/user", method = RequestMethod.GET)
+//    public ResponseEntity<Flux<User>> getUsers() {
+//        return ResponseEntity.ok(this.userServiceImpl.getUsers());
+//    }
 
     @RequestMapping(value = "/user/login", method = RequestMethod.POST)
     public Mono<ResponseEntity<AccessTokenResponse>> login(@RequestBody UserLoginDto userLoginDto) {
@@ -75,7 +75,7 @@ public class UserController {
 
     }
 
-    @RequestMapping(value = "/user/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/user", method = RequestMethod.GET)
     public Mono<ResponseEntity<?>> getUserById(JwtAuthenticationToken jwtToken) {
         String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
         return this.userServiceImpl.getUserByUserName(username)
