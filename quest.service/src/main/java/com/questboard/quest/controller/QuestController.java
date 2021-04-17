@@ -125,13 +125,13 @@ public class QuestController {
         if (id == null || param.isEmpty()) {
             return Mono.just(false);
         } else {
-            Integer userId;
+            String username;
             if (param.containsKey("awardTo")) {
-                userId = Integer.parseInt(param.get("awardTo"));
+                username = param.get("awardTo");
             } else {
                 return Mono.just(false);
             }
-            return this.questService.awardQuest(id, userId);
+            return this.questService.awardQuest(id, username);
         }
     }
 

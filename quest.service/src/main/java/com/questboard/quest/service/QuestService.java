@@ -31,7 +31,7 @@ public interface QuestService {
     public Mono<Quest> createNewQuest(Quest quest);
     public Mono<Quest> updateQuest(Quest quest);
     public Mono<Void> deleteQuest(Integer id);
-    public Mono<Boolean> awardQuest(Integer id, Integer awardedTo);
+    public Mono<Boolean> awardQuest(Integer id, String awardedTo);
     public Mono<QuestProposal> createQuestProposal(QuestProposal questProposal, List<SkillSetProfileDto> skillSetProfileDto);
     public Mono<QuestFlow> initialNewQuestFlow(Integer questId);
     public Mono<QuestFlow> updateQuestFlow(QuestFlow questFlow);

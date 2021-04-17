@@ -139,7 +139,7 @@ class QuestServiceImpl implements QuestService {
     }
 
     @Override
-    public Mono<Boolean> awardQuest(Integer id, Integer awardedTo) {
+    public Mono<Boolean> awardQuest(Integer id, String awardedTo) {
         return this.questRepo.findById(id)
                 .flatMap(q -> {
                     q.setAwarded(true);
