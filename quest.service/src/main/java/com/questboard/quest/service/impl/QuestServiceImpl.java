@@ -278,5 +278,13 @@ class QuestServiceImpl implements QuestService {
         return this.questProposalRepo.findByUsername(userName);
     }
 
+    @Override
+    public Mono<QuestUserConcern> createQuestUserConcern(QuestUserConcern questUserConcern) {
+        return this.questUserConcernRepo.save(questUserConcern);
+    }
 
+    @Override
+    public Mono<Void> deleteQuestUserConcern(Integer id) {
+        return this.questUserConcernRepo.deleteById(id);
+    }
 }

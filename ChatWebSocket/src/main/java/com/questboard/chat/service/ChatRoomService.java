@@ -13,23 +13,24 @@ public class ChatRoomService {
     private ChatRoomRepository chatRoomRepository;
 
     public Optional<String> getChatId(
-            String senderId, String recipientId, boolean createIfNotExist) {
+            String senderId, String recipientId, String questId, boolean createIfNotExist) {
 
         return chatRoomRepository
-                .findBySenderIdAndRecipientId(senderId, recipientId)
+                .findBySenderIdAndRecipientIdAndQuestId(senderId, recipientId, questId)
                 .map(ChatRoom::getChatId)
                 .or(() -> {
                     if(!createIfNotExist) {
                         return  Optional.empty();
                     }
                     String chatId =
-                            String.format("%s_%s", senderId, recipientId);
+                            String.format("%s_%s_%s", senderId, recipientId, questId);
 
                     ChatRoom senderRecipient = ChatRoom
                             .builder()
                             .chatId(chatId)
                             .senderId(senderId)
                             .recipientId(recipientId)
+                            .questId(questId)
                             .build();
 
                     ChatRoom recipientSender = ChatRoom
@@ -37,6 +38,7 @@ public class ChatRoomService {
                             .chatId(chatId)
                             .senderId(recipientId)
                             .recipientId(senderId)
+                            .questId(questId)
                             .build();
                     chatRoomRepository.save(senderRecipient);
                     chatRoomRepository.save(recipientSender);

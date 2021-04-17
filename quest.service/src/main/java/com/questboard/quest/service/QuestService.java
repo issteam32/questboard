@@ -43,5 +43,7 @@ public interface QuestService {
     public Mono<Void> deleteQuestRequirement(Integer id);
     public Mono<QuestWithProposal> getQuestWithProposal(Integer questId);
     public Flux<QuestProposal> getQuestProposal(String userName);
+    public Mono<QuestUserConcern> createQuestUserConcern(QuestUserConcern questUserConcern);
+    public Mono<Void> deleteQuestUserConcern(Integer id);
 }
 

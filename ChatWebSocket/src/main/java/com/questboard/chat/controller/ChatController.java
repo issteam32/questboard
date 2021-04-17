@@ -33,7 +33,7 @@ public class ChatController {
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessage chatMessage) {
         String chatId = chatRoomService
-                .getChatId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true).get();
+                .getChatId(chatMessage.getSenderId(), chatMessage.getRecipientId(), chatMessage.getQuestId(), true).get();
         chatMessage.setChatId(chatId);
 
         ChatMessage saved = chatMessageService.save(chatMessage);
@@ -55,11 +55,12 @@ public class ChatController {
                 .ok(chatMessageService.countNewMessages(senderId, recipientId));
     }
 
-    @GetMapping("/messages/{senderId}/{recipientId}")
+    @GetMapping("/messages/{senderId}/{recipientId}/{questId}")
     public ResponseEntity<?> findChatMessages ( @PathVariable String senderId,
-                                                @PathVariable String recipientId) {
+                                                @PathVariable String recipientId,
+                                                @PathVariable String questId) {
         return ResponseEntity
-                .ok(chatMessageService.findChatMessages(senderId, recipientId));
+                .ok(chatMessageService.findChatMessages(senderId, recipientId, questId));
     }
 
     @GetMapping("/messages/{id}")

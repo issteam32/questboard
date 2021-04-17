@@ -2,10 +2,7 @@ package com.questboard.quest.controller;
 
 import com.questboard.quest.dto.QuestWithProposal;
 import com.questboard.quest.dto.SkillSetProfileDto;
-import com.questboard.quest.entity.Quest;
-import com.questboard.quest.entity.QuestFlow;
-import com.questboard.quest.entity.QuestProposal;
-import com.questboard.quest.entity.QuestRequirement;
+import com.questboard.quest.entity.*;
 import com.questboard.quest.enums.QuestCategory;
 import com.questboard.quest.repository.QuestRequirementRepository;
 import com.questboard.quest.service.QuestService;
@@ -221,5 +218,33 @@ public class QuestController {
         logger.info("toke username: {}", token.getToken().getClaims().get("preferred_username"));
         String username = (String)token.getToken().getClaims().get("preferred_username");
         return this.questService.getQuestProposal(username);
+    }
+
+    @RequestMapping(value = "/quest/user-concern", method = RequestMethod.POST)
+    public Mono<QuestUserConcern> createQuestUserConcern(@RequestBody HashMap<String, String> param) {
+        logger.info("user concern: {}", param);
+        QuestUserConcern questUserConcern = new QuestUserConcern();
+        if (param.containsKey("context")) {
+            questUserConcern.setContext(param.get("context"));
+        }
+        if (param.containsKey("concernValidation")) {
+            questUserConcern.setConcernValidation(param.get("concernValidation"));
+        }
+        questUserConcern.setQuestId(Integer.parseInt(param.get("questId")));
+        return this.questService.createQuestUserConcern(questUserConcern);
+    }
+
+    @RequestMapping(value = "/quest/user-concern/{id}", method = RequestMethod.DELETE)
+    public Mono<Void> deleteQuestUserConcern(JwtAuthenticationToken token, @PathVariable("id") Integer id) {
+        logger.info("toke username: {}", token.getToken().getClaims().get("preferred_username"));
+        String username = (String)token.getToken().getClaims().get("preferred_username");
+        return this.questService.getQuestById(id)
+                .flatMap(quest -> {
+                    if (quest.getRequestor().equals(username)) {
+                        return this.questService.deleteQuestUserConcern(id);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
     }
 }
