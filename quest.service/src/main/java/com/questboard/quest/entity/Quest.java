@@ -37,7 +37,7 @@ public class Quest {
     private Boolean awarded;
 
     @Column("requestor")
-    private Integer requestor;
+    private String requestor;
 
     @Column("reward_type")
     private Integer rewardType;
@@ -46,7 +46,7 @@ public class Quest {
     private String reward;
 
     @Column("awarded_to")
-    private Integer awardedTo;
+    private String awardedTo;
 
     @Column("created_date")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -58,7 +58,7 @@ public class Quest {
 
 
     public Quest(Integer id, String title, String description, Integer category, String location, Integer difficultyLevel,
-                 String status, Boolean awarded, Integer requestor, Integer rewardType, String reward, Integer awardedTo,
+                 String status, Boolean awarded, String requestor, Integer rewardType, String reward, String awardedTo,
                  LocalDateTime createdDate, LocalDateTime updatedDate) {
         this.id = id;
         this.title = title;
@@ -143,14 +143,6 @@ public class Quest {
         this.awarded = awarded;
     }
 
-    public Integer getRequestor() {
-        return requestor;
-    }
-
-    public void setRequestor(Integer requestor) {
-        this.requestor = requestor;
-    }
-
     public Integer getRewardType() {
         return rewardType;
     }
@@ -183,19 +175,28 @@ public class Quest {
         this.updatedDate = updatedDate;
     }
 
-    public Integer getAwardedTo() {
-        return awardedTo;
-    }
-
-    public void setAwardedTo(Integer awardedTo) {
-        this.awardedTo = awardedTo;
-    }
-
     public String getSkillRequired() {
         return skillRequired;
     }
 
     public void setSkillRequired(String skillRequired) {
         this.skillRequired = skillRequired;
+    }
+
+
+    public String getRequestor() {
+        return requestor;
+    }
+
+    public void setRequestor(String requestor) {
+        this.requestor = requestor;
+    }
+
+    public String getAwardedTo() {
+        return awardedTo;
+    }
+
+    public void setAwardedTo(String awardedTo) {
+        this.awardedTo = awardedTo;
     }
 }
