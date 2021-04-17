@@ -73,6 +73,7 @@ public class QuestController {
     @RequestMapping(value = "/quest", method = RequestMethod.POST)
     public Mono<Quest> createQuest(@RequestBody HashMap<String, Object> param) {
         Quest quest = (Quest)ReqBodyUtils.convertValue(param, Quest.class);
+        quest.setStatus("PUBLISHED");
         return this.questService.createNewQuest(quest)
                 .onErrorResume(error -> {
                     logger.error("Creating new quest, error: {}", error.getMessage());
@@ -86,6 +87,7 @@ public class QuestController {
             return Mono.error(new Error("No id provided"));
         }
         Quest quest = (Quest) ReqBodyUtils.convertValue(param, Quest.class);
+        quest.setId(id);
         return this.questService.updateQuest(quest)
                 .onErrorResume(error -> {
                     logger.error("Update quest, error: {}", error.getMessage());

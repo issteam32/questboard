@@ -16,7 +16,7 @@ create table IF NOT EXISTS quest (
     title varchar(255) not null,
     description varchar(1000) null,
     category tinyint(3) null,
-    location int null,
+    location varchar(100) null,
     difficulty_level integer null,
     status varchar(20) null,
     skill_required varchar(500) null,
