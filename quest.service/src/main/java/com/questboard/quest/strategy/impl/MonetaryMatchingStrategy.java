@@ -22,13 +22,21 @@ public class MonetaryMatchingStrategy implements QuestMatchingStrategy {
                 }
             }
         } else if (cV.getOperator().equalsIgnoreCase(">")) {
+            /**
+             * taker > x amount, minimally need x amount
+             * request > x, at most x amount
+             */
             Double balance = ((cV.getEvaluation() + cA.getEvaluation())/ 2);
-            if (balance.equals(cV.getEvaluation()) || balance > cV.getEvaluation()) {
+            if (balance.equals(cV.getEvaluation()) || balance < cV.getEvaluation()) {
                 return 1;
             } else {
                 return 0;
             }
         } else if (cV.getOperator().equalsIgnoreCase("<")) {
+            /**
+             * taker < x amount, maximally x amount
+             * request > x, minimally x amount
+             */
             Double balance = ((cV.getEvaluation() + cA.getEvaluation())/ 2);
             if (balance.equals(cV.getEvaluation()) || cV.getEvaluation() > balance) {
                 return 1;

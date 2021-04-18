@@ -134,11 +134,11 @@ public class QuestController {
 
     @RequestMapping(value = "/quest/proposal", method = RequestMethod.POST)
     public Mono<QuestProposal> createProfessionalQuestProposal(@RequestBody HashMap<String, Object> param) {
-        if (! param.containsKey("proposal") || !param.containsKey("skillsetProfile")) {
+        if (! param.containsKey("proposal") || !param.containsKey("skillSetProfileList")) {
             return Mono.error(new Error("no skillset profile or proposal found!"));
         }
         HashMap<String, Object> proposalMap = (HashMap<String, Object>) param.get("proposal");
-        List<HashMap<String, Object>> skillsetProfileList = new ArrayList(Collections.singletonList(param.get("skillSetProfileList")));
+        List<HashMap<String, Object>> skillsetProfileList = (List<HashMap<String, Object>>)param.get("skillSetProfileList");
         List<SkillSetProfileDto> skillSetProfileDtos = skillsetProfileList.stream()
                 .map(mapObject -> (SkillSetProfileDto)ReqBodyUtils.convertValue(mapObject, SkillSetProfileDto.class))
                 .collect(Collectors.toList());
@@ -232,6 +232,12 @@ public class QuestController {
         }
         questUserConcern.setQuestId(Integer.parseInt(param.get("questId")));
         return this.questService.createQuestUserConcern(questUserConcern);
+    }
+
+    @RequestMapping(value = "/quest/proposal-evaluate/{questId}", method = RequestMethod.POST)
+    public Mono<Void> createQuestUserConcern(@PathVariable("questId") Integer questId) {
+        logger.info("quest to reevaluate {}", questId);
+        return this.questService.evaluateQuestProposal(questId);
     }
 
     @RequestMapping(value = "/quest/user-concern/{id}", method = RequestMethod.DELETE)

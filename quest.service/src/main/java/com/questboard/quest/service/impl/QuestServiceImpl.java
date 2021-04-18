@@ -1,5 +1,6 @@
 package com.questboard.quest.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.questboard.quest.dto.*;
 import com.questboard.quest.entity.*;
@@ -170,9 +171,13 @@ class QuestServiceImpl implements QuestService {
         Mono<QuestWithUserConcern> questWithUserConcerns = quest.zipWith(questUserConcernList)
                 .flatMap(tuple -> {
                     logger.info("tuple result, {}", tuple);
-                    if (tuple != null && tuple.getT2().isEmpty()) {
+                    if (tuple != null && tuple.getT1() != null) {
+                        logger.debug("tuple result is not null");
                         Quest q = tuple.getT1();
-                        List<QuestUserConcern> questUserConcerns = tuple.getT2();
+                        List<QuestUserConcern> questUserConcerns = new ArrayList<>();
+                        if (! tuple.getT2().isEmpty()) {
+                            questUserConcerns.addAll(tuple.getT2());
+                        }
                         return Mono.just(new QuestWithUserConcern(q, questUserConcerns));
                     } else {
                         return Mono.empty();
@@ -181,19 +186,87 @@ class QuestServiceImpl implements QuestService {
 
         return questWithUserConcerns
                 .flatMap(questWithUserConcern -> {
+                    logger.info("there are something user is concern with their quests");
                     String proposalJson = questProposal.getProposalJson();
                     String skillRequired = questWithUserConcern.getQuest().getSkillRequired();
                     List<ConcernValidationJson> concernValidationJsons = questWithUserConcern.getQuestUserConcern()
                             .stream()
                             .map(questUserConcern -> {
                                 ObjectMapper mapper = new ObjectMapper();
-                                return mapper.convertValue(questUserConcern.getConcernValidation(), ConcernValidationJson.class);
+                                try {
+                                    return mapper.readValue(questUserConcern.getConcernValidation(), ConcernValidationJson.class);
+                                } catch (JsonProcessingException e) {
+                                    e.printStackTrace();
+                                    return new ConcernValidationJson();
+                                }
                             }).collect(Collectors.toList());
+                    logger.info("concern validation list: {}", concernValidationJsons);
                     double score = ServiceUtils.proposalScoreCounting(proposalJson, concernValidationJsons, skillRequired, skillSetProfileList);
                     questProposal.setProposalScore(score);
                     return this.questProposalRepo.save(questProposal);
                 })
                 .switchIfEmpty(Mono.defer(() -> this.questProposalRepo.save(questProposal)));
+    }
+
+    @Override
+    public Mono<Void> evaluateQuestProposal(Integer questId) {
+        Mono<Quest> quest = this.questRepo.findById(questId);
+        Mono<List<QuestUserConcern>> questUserConcernList = this.questUserConcernRepo
+                .findByQuestId(questId).collectList();
+        Mono<List<QuestProposal>> questProposals = this.questProposalRepo.findByQuestId(questId).collectList();
+
+        Mono<QuestNConcernNProposal> questNConcernNProposalMono = quest.zipWith(questUserConcernList).zipWith(questProposals)
+                .flatMap(tuple -> {
+                    logger.info("tuple result, {}", tuple);
+                    if (tuple != null && tuple.getT1() != null) {
+                        logger.debug("tuple result is not null");
+                        Quest q = tuple.getT1().getT1();
+                        List<QuestUserConcern> questUserConcerns = new ArrayList<>();
+                        if (! tuple.getT1().getT2().isEmpty()) {
+                            questUserConcerns.addAll(tuple.getT1().getT2());
+                        }
+                        List<QuestProposal> questProposalsList = new ArrayList<>();
+                        if (! tuple.getT2().isEmpty()) {
+                            questProposalsList.addAll(tuple.getT2());
+                        }
+
+                        return Mono.just(new QuestNConcernNProposal(q, questUserConcerns, questProposalsList));
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+
+        return questNConcernNProposalMono
+                .flatMap(questNConcernNProposal -> {
+                    for (QuestProposal proposal: questNConcernNProposal.getQuestProposal()) {
+                        String proposalJson = proposal.getProposalJson();
+                        String skillRequired = questNConcernNProposal.getQuest().getSkillRequired();
+                        List<ConcernValidationJson> concernValidationJsons = questNConcernNProposal.getQuestUserConcern()
+                                .stream()
+                                .map(questUserConcern -> {
+                                    ObjectMapper mapper = new ObjectMapper();
+                                    try {
+                                        return mapper.readValue(questUserConcern.getConcernValidation(), ConcernValidationJson.class);
+                                    } catch (JsonProcessingException e) {
+                                        e.printStackTrace();
+                                        return new ConcernValidationJson();
+                                    }
+                                }).collect(Collectors.toList());
+
+                        logger.info("concern validation list: {}", concernValidationJsons);
+                        List<SkillSetProfileDto> emptyList = new ArrayList<>();
+                        double score = ServiceUtils.proposalScoreCounting(proposalJson, concernValidationJsons, skillRequired, emptyList);
+                        logger.info("quest reevaluate score: {}", score);
+                        if (proposal.getProposalScore() != null && proposal.getProposalScore() >= 40) {
+                            score = (score / 100.0) * 60.0;
+                            score += proposal.getProposalScore();
+                        }
+                        logger.info("quest reevaluate score added with original score: {}", score);
+                        proposal.setProposalScore(score);
+                        this.questProposalRepo.save(proposal).subscribe();
+                    }
+                    return Mono.empty();
+                });
     }
 
     @Override

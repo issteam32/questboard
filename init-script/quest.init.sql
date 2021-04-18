@@ -39,6 +39,7 @@ create table IF NOT EXISTS quest_proposal (
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     username varchar(100) not null,
+    cost varchar(255) null,
     quest_id int not null,
     primary key(id),
     foreign key (quest_id) references quest(id) on delete cascade
