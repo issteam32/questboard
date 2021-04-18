@@ -46,5 +46,12 @@ public interface QuestService {
     public Mono<QuestUserConcern> createQuestUserConcern(QuestUserConcern questUserConcern);
     public Mono<Void> deleteQuestUserConcern(Integer id);
     public Mono<Void> evaluateQuestProposal(Integer questId);
+    public Mono<Void> deleteQuestProposal(Integer id);
+    public Mono<QuestTakerRequest> createQuestTakerRequest(QuestTakerRequest questTakerRequest);
+    public Mono<QuestTakerRequest> updateQuestTakerRequest(Integer id, String status);
+    public Flux<QuestTakerRequest> getQuestTakerRequestByQuestId(Integer questId);
+    public Mono<QuestTakerRequest> getQuestTakerRequestById(Integer id);
+    public Mono<Void> deleteQuestTakerRequest(Integer id);
+
 }
 

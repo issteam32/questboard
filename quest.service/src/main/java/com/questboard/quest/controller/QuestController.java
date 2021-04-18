@@ -5,6 +5,7 @@ import com.questboard.quest.dto.SkillSetProfileDto;
 import com.questboard.quest.entity.*;
 import com.questboard.quest.enums.QuestCategory;
 import com.questboard.quest.repository.QuestRequirementRepository;
+import com.questboard.quest.repository.QuestTakerRequestRepository;
 import com.questboard.quest.service.QuestService;
 import com.questboard.quest.util.ReqBodyUtils;
 import org.slf4j.Logger;
@@ -153,6 +154,11 @@ public class QuestController {
                 });
     }
 
+    @RequestMapping(value = "/quest/proposal/{id}", method = RequestMethod.DELETE)
+    public Mono<Void> deleteQuestProposal(@PathVariable("id") Integer id) {
+        return this.questService.deleteQuestProposal(id);
+    }
+
     @RequestMapping(value = "/quest/flow", method = RequestMethod.POST)
     public Mono<QuestFlow> createNewQuestFlow(@RequestBody HashMap<String, String> param) {
         if (! param.containsKey("questId")) {
@@ -252,5 +258,54 @@ public class QuestController {
                         return Mono.empty();
                     }
                 });
+    }
+
+    @RequestMapping(value = "/quest/quest-taker", method = RequestMethod.POST)
+    public Mono<QuestTakerRequest> createQuestTakerRequest(JwtAuthenticationToken token, @RequestBody Map<String, String> param) {
+        String username = (String)token.getToken().getClaims().get("preferred_username");
+        logger.info("{} wants to create taker request, {}", username, param);
+        QuestTakerRequest questTakerRequest = new QuestTakerRequest();
+        if (param.containsKey("questId")) {
+            questTakerRequest.setQuestId(Integer.parseInt(param.get("questId")));
+        } else {
+            logger.info("no quest id provided");
+            return Mono.empty();
+        }
+        questTakerRequest.setStatus("REQUESTED");
+        questTakerRequest.setUsername(username);
+        return this.questService.createQuestTakerRequest(questTakerRequest);
+    }
+
+    @RequestMapping(value = "/quest/quest-taker", method = RequestMethod.PUT)
+    public Mono<QuestTakerRequest> updateQuestTakerRequest(@RequestBody Map<String, String> param) {
+        String status = "";
+        Integer id = -1;
+        if (param.containsKey("status")) {
+            status = param.get("status");
+        } else {
+            return Mono.empty();
+        }
+
+        if (param.containsKey("id")) {
+            id = Integer.parseInt(param.get("questId"));
+        } else {
+            return Mono.empty();
+        }
+        return this.questService.updateQuestTakerRequest(id, status);
+    }
+
+    @RequestMapping(value = "/quest/quest-taker-quest/{questId}", method = RequestMethod.GET)
+    public Flux<QuestTakerRequest> getQuestTakerRequestByQuestId(@PathVariable("questId") Integer questId) {
+        return this.questService.getQuestTakerRequestByQuestId(questId);
+    }
+
+    @RequestMapping(value = "/quest/quest-taker-id/{id}", method = RequestMethod.GET)
+    public Mono<QuestTakerRequest> getQuestTakerRequestById(@PathVariable("id") Integer id) {
+        return this.questService.getQuestTakerRequestById(id);
+    }
+
+    @RequestMapping(value = "/quest/quest-taker/{id}", method = RequestMethod.DELETE)
+    public Mono<Void> deleteQuestTakerRequest(@PathVariable("id") Integer id) {
+        return this.questService.deleteQuestTakerRequest(id);
     }
 }

@@ -40,6 +40,9 @@ class QuestServiceImpl implements QuestService {
     @Autowired
     private QuestRequirementRepository questReqRepo;
 
+    @Autowired
+    private QuestTakerRequestRepository questTakerRequestRepo;
+
     @Override
     public Mono<Quest> getQuestById(Integer id) {
         return this.questRepo.findById(id);
@@ -359,5 +362,52 @@ class QuestServiceImpl implements QuestService {
     @Override
     public Mono<Void> deleteQuestUserConcern(Integer id) {
         return this.questUserConcernRepo.deleteById(id);
+    }
+
+    @Override
+    public Mono<Void> deleteQuestProposal(Integer id) {
+        return this.questProposalRepo.deleteById(id);
+    }
+
+    @Override
+    public Mono<QuestTakerRequest> createQuestTakerRequest(QuestTakerRequest questTakerRequest) {
+        return this.questTakerRequestRepo
+                .existsByUsernameAndQuestId(questTakerRequest.getUsername(), questTakerRequest.getQuestId())
+                .flatMap(exist -> {
+                    if (exist) {
+                        logger.info("User has created request for this quest");
+                        return Mono.empty();
+                    } else {
+                        return this.questTakerRequestRepo.save(questTakerRequest);
+                    }
+                });
+    }
+
+    @Override
+    public Mono<QuestTakerRequest> updateQuestTakerRequest(Integer id, String status) {
+        return this.questTakerRequestRepo.findById(id)
+                .flatMap(questTakerReq -> {
+                    if ("REQ".equalsIgnoreCase(status)) {
+                        questTakerReq.setStatus("REQUESTED");
+                    } else if ("AWA".equalsIgnoreCase(status)) {
+                        questTakerReq.setStatus("AWARDED");
+                    }
+                    return this.questTakerRequestRepo.save(questTakerReq);
+                });
+    }
+
+    @Override
+    public Flux<QuestTakerRequest> getQuestTakerRequestByQuestId(Integer questId) {
+        return this.questTakerRequestRepo.findByQuestId(questId);
+    }
+
+    @Override
+    public Mono<QuestTakerRequest> getQuestTakerRequestById(Integer id) {
+        return this.questTakerRequestRepo.findById(id);
+    }
+
+    @Override
+    public Mono<Void> deleteQuestTakerRequest(Integer id) {
+        return this.questTakerRequestRepo.deleteById(id);
     }
 }
