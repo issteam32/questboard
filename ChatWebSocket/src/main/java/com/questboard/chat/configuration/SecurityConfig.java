@@ -10,7 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import java.util.Objects;
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private Environment env;
@@ -23,9 +23,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         System.out.println("################## chat env variable ###################");
         http.cors()
                 .and()
+                .authorizeRequests().antMatchers("/ws/**")
+                .permitAll()
+                .and()
                 .authorizeRequests(authorize -> authorize
                         .antMatchers("/health-check").permitAll()
-                        .antMatchers("/chat/**").permitAll()
                         .antMatchers("/**").authenticated()
 //                        .antMatchers("/**").permitAll()
                 )
