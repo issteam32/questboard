@@ -69,9 +69,11 @@ public class QuestController {
     }
 
     @RequestMapping(value = "/quest", method = RequestMethod.POST)
-    public Mono<Quest> createQuest(@RequestBody HashMap<String, Object> param) {
+    public Mono<Quest> createQuest(JwtAuthenticationToken token, @RequestBody HashMap<String, Object> param) {
+        String username = token.getToken().getClaim("preferred_username");
         Quest quest = (Quest)ReqBodyUtils.convertValue(param, Quest.class);
         quest.setStatus("PUBLISHED");
+        quest.setRequestor(username);
         return this.questService.createNewQuest(quest)
                 .onErrorResume(error -> {
                     logger.error("Creating new quest, error: {}", error.getMessage());
