@@ -11,6 +11,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,6 +68,12 @@ public class ChatController {
     public ResponseEntity<?> findMessage (@PathVariable String id) {
         return ResponseEntity
                 .ok(chatMessageService.findById(id));
+    }
+
+    @GetMapping("/rooms")
+    public ResponseEntity<?> findChatRoomsById(JwtAuthenticationToken token) {
+        String username = (String) token.getToken().getClaims().get("preferred_username");
+        return ResponseEntity.ok(chatRoomService.getUserChatRooms(username));
     }
 
 }
