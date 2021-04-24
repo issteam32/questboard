@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,23 +39,26 @@ public class UserController {
     @Autowired
     private SocialAccountService socialAccountService;
 
-    @RequestMapping(value = "/user", method = RequestMethod.GET)
-    public ResponseEntity<Flux<User>> getUsers() {
-        return ResponseEntity.ok(this.userServiceImpl.getUsers());
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
     }
 
+//    @RequestMapping(value = "/user", method = RequestMethod.GET)
+//    public ResponseEntity<Flux<User>> getUsers() {
+//        return ResponseEntity.ok(this.userServiceImpl.getUsers());
+//    }
+
     @RequestMapping(value = "/user/login", method = RequestMethod.POST)
-    public Mono<ResponseEntity<RespBody<AccessTokenResponse>>> login(@RequestBody UserLoginDto userLoginDto) {
+    public Mono<ResponseEntity<AccessTokenResponse>> login(@RequestBody UserLoginDto userLoginDto) {
             return this.keycloakRestService.loginSecure(userLoginDto.username, userLoginDto.password)
-                    .map(accessTokenResponse -> ResponseEntity.ok(RespBody.body(accessTokenResponse)))
-                    .onErrorResume(error -> Mono.just(ResponseEntity
-                            .status(HttpStatus.UNAUTHORIZED)
-                            .body(new RespBody<>("Unauthorized access")))
-                            );
+                    .map(ResponseEntity::ok)
+                    .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null)));
+//                    .onErrorResume(error -> ResponseEntity.status(HttpStatus.UNAUTHORIZED));
     }
 
     @RequestMapping(value = "/user/register", method = RequestMethod.POST)
-    public Mono<ResponseEntity<RespBody<Boolean>>> registerUser(@RequestBody Map<String, String> param) {
+    public Mono<ResponseEntity<Boolean>> registerUser(@RequestBody Map<String, String> param) {
             UserRegistrationDto userRegistration = new UserRegistrationDto();
             userRegistration.setUserName(param.get("username"));
             userRegistration.setEmail(param.get("email"));
@@ -62,30 +66,29 @@ public class UserController {
             userRegistration.setPasswordConfirm(param.get("passwordConfirm"));
 
             return this.keycloakRestService.registerUser(userRegistration)
-                    .map(registered -> ResponseEntity.ok(RespBody.body(registered)))
+                    .map(ResponseEntity::ok)
                     .onErrorResume(error -> {
                         logger.error("Error occur when creating new user ");
                         return Mono.just(ResponseEntity.badRequest()
-                                .body(RespBody.body(false).setError("Error when creating new user: " + error.getMessage()).failed()
-                                        .setRequired(new String[]{"username", "email", "password", "passwordConfirm"})));
+                                .body(false));
                     });
 
     }
 
-    @RequestMapping(value = "/user/{id}", method = RequestMethod.GET)
-    public Mono<ResponseEntity<RespBody<User>>> getUserById(@PathVariable("id") Integer id) {
-        return this.userServiceImpl.getUserById(id)
-                .map(user -> ResponseEntity.ok(RespBody.body(user)))
-                .onErrorResume(error -> {
-                    logger.error("Error occur when getting user with id" + id);
-                    logger.error(error.getMessage());
-                    return Mono.just(ResponseEntity.status(404)
-                        .body(new RespBody<>("User not found")));
-                });
+    @RequestMapping(value = "/user", method = RequestMethod.GET)
+    public Mono<ResponseEntity<?>> getUserById(JwtAuthenticationToken jwtToken) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userServiceImpl.getUserByUserName(username)
+                .map(ResponseEntity::ok);
+//                .onErrorResume(error -> {
+//                    logger.error("Error occur when getting user with id" + username);
+//                    logger.error(error.getMessage());
+//                    return ResponseEntity.status(404);
+//                });
     }
 
     @RequestMapping(value = "/user/{id}", method = RequestMethod.PUT)
-    public Mono<ResponseEntity<RespBody<Boolean>>> updateUser(@RequestBody Map<String, String> param, @PathVariable("id") Integer id) {
+    public Mono<ResponseEntity<Boolean>> updateUser(@RequestBody Map<String, String> param, @PathVariable("id") Integer id) {
         logger.info("Param value: " + param);
         logger.info("id value: " + id);
         UserUpdateDto userUpdateDto = new UserUpdateDto(id);
@@ -107,42 +110,45 @@ public class UserController {
         }
         logger.info("userDto in controller: \n" + userUpdateDto.toString());
         return this.keycloakRestService.updateUser(userUpdateDto)
-                .map(updatedStatus -> ResponseEntity.ok(RespBody.body(updatedStatus)))
+                .map(ResponseEntity::ok)
                 .onErrorResume(error -> {
                     logger.error("Error occur when updating user with id" + id + error.getMessage());
                     return Mono.just(ResponseEntity.badRequest()
-                            .body(RespBody.body(false)
-                                    .setError("User not updated due to " + error.getMessage())
-                                    .failed()
-                                    .setRequired(userUpdateDto.requiredFields())));
+                            .body(false));
                 });
     }
 
-    @RequestMapping(value = "/user-social-account/{id}", method = RequestMethod.GET)
-    public Flux<SocialAccount> getUserSocialAccount(@PathVariable("id") Integer userId) {
-        return this.socialAccountService.getSocialAccountByUserId(userId);
+    @RequestMapping(value = "/user-social-account", method = RequestMethod.GET)
+    public Flux<SocialAccount> getUserSocialAccount(JwtAuthenticationToken jwtToken) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userServiceImpl.getUserByUserName(username)
+                .flatMapMany(user -> this.socialAccountService.getSocialAccountByUserId(user.getId()));
+//        return this.socialAccountService.getSocialAccountByUserId(userId);
     }
 
-    @RequestMapping(value = "/user-social-account/{id}", method = RequestMethod.POST)
-    public Mono<SocialAccount> linkupUserSocialAccount(@RequestBody Map<String, String> param, @PathVariable("id") Integer userId) {
-        SocialAccount socialAccount = new SocialAccount();
-        if (userId != null) {
-            socialAccount.setUserId(userId);
-        }
-        if (param.containsKey("socialAccountLink")) {
-            socialAccount.setSocialAcctLink(param.get("socialAccountLink"));
-        }
-        if (param.containsKey("socialPlatform")) {
-            Integer sp = Integer.parseInt(param.get("socialPlatform"));
-            if (sp.equals(SocialPlatform.FACEBOOK.value)) {
-                socialAccount.setSocialPlatform(SocialPlatform.FACEBOOK.value);
-            } else if (sp.equals(SocialPlatform.GOOGLE.value)) {
-                socialAccount.setSocialPlatform(SocialPlatform.GOOGLE.value);
-            }
-        }
-        return this.socialAccountService.linkupSocialAccount(socialAccount)
+    @RequestMapping(value = "/user-social-account", method = RequestMethod.POST)
+    public Mono<SocialAccount> linkupUserSocialAccount(JwtAuthenticationToken jwtToken, @RequestBody Map<String, String> param) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userServiceImpl.getUserByUserName(username)
+                .flatMap(user -> {
+                    SocialAccount socialAccount = new SocialAccount();
+                    socialAccount.setUserId(user.getId());
+
+                    if (param.containsKey("socialAccountLink")) {
+                        socialAccount.setSocialAcctLink(param.get("socialAccountLink"));
+                    }
+                    if (param.containsKey("socialPlatform")) {
+                        Integer sp = Integer.parseInt(param.get("socialPlatform"));
+                        if (sp.equals(SocialPlatform.FACEBOOK.value)) {
+                            socialAccount.setSocialPlatform(SocialPlatform.FACEBOOK.value);
+                        } else if (sp.equals(SocialPlatform.GOOGLE.value)) {
+                            socialAccount.setSocialPlatform(SocialPlatform.GOOGLE.value);
+                        }
+                    }
+                    return this.socialAccountService.linkupSocialAccount(socialAccount);
+                })
                 .onErrorResume(error -> {
-                    logger.error("Unable to link up social account with (userId:{}), error: {}", userId, error.getMessage());
+                    logger.error("Unable to link up social account with (userId:{}), error: {}", username, error.getMessage());
                     return Mono.error(new Error(error.getMessage()));
                 });
     }

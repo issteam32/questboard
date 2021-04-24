@@ -16,7 +16,7 @@ create table IF NOT EXISTS quest (
     title varchar(255) not null,
     description varchar(1000) null,
     category tinyint(3) null,
-    location int null,
+    location varchar(100) null,
     difficulty_level integer null,
     status varchar(20) null,
     skill_required varchar(500) null,
@@ -38,7 +38,8 @@ create table IF NOT EXISTS quest_proposal (
     proposal_score double not null default 0,
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    user_id int not null,
+    username varchar(100) not null,
+    cost varchar(255) null,
     quest_id int not null,
     primary key(id),
     foreign key (quest_id) references quest(id) on delete cascade
@@ -90,4 +91,15 @@ create table IF NOT EXISTS location (
     quest_id int not null,
     primary key(id),
     foreign key(quest_id) references quest(id) on delete cascade
+) character set utf8 collate utf8_general_ci;
+
+create table IF NOT EXISTS quest_taker_request (
+    id int not null auto_increment,
+    quest_id int not null,
+    username varchar(120) not null,
+    status varchar(20) null,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    foreign key (quest_id) references quest(id) on delete cascade,
+  	primary key(id)
 ) character set utf8 collate utf8_general_ci;

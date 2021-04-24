@@ -5,3 +5,4 @@ target
 /db/
 **/quest.service/db/
 .env
+**/secret.yaml

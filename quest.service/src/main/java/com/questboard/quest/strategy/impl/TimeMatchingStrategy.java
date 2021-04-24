@@ -20,9 +20,9 @@ public class TimeMatchingStrategy implements QuestMatchingStrategy {
             long days = Duration.between(cVDate, cADate).toDays();
             return days >= 2 ? 1: 0;
         } else if (cV.getOperator().equalsIgnoreCase(">")) {
-            return cADate.isAfter(cVDate)? 1 : 0;
+            return cVDate.isAfter(cADate)? 1 : 0;
         } else if (cV.getOperator().equalsIgnoreCase("<")) {
-            return cADate.isBefore(cVDate)? 1: 0;
+            return cVDate.isBefore(cADate)? 1: 0;
         } else {
             return 0;
         }

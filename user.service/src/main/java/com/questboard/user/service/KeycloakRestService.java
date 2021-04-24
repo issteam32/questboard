@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.HttpEntity;
@@ -40,6 +41,7 @@ import reactor.core.scheduler.Schedulers;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -61,14 +63,8 @@ public class KeycloakRestService {
     @Value("${keycloak.logout}")
     private String keycloakLogout;
 
-    @Value("${keycloak.client-id}")
-    private String clientId;
-
     @Value("${keycloak.authorization-grant-type}")
     private String grantType;
-
-    @Value("${keycloak.client-secret}")
-    private String clientSecret;
 
     @Value("${keycloak.scope}")
     private String scope;
@@ -76,26 +72,16 @@ public class KeycloakRestService {
     @Value("${keycloak.redirect-uri}")
     private String redirectUri;
 
-    @Value("${keycloak.server-uri}")
-    private String keycloakServerUri;
-
-    @Value("${keycloak.realm}")
-    private String keycloakRealm;
-
     @Value("${keycloak.register-user-uri}")
     private String keycloakRegisterUserUri;
-
-    @Value("${keycloak.super-username}")
-    private String keycloakSuperUsername;
-
-    @Value("${keycloak.super-password}")
-    private String keycloakSuperPassword;
 
     @Value("${keycloak.admin-cli-id}")
     private String keycloakAdminCliClientId;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @Autowired
+    private Environment env;
     /**
      * login request fire from mobile client to keycloak
      *
@@ -104,6 +90,8 @@ public class KeycloakRestService {
      * @return access_token
      */
     public Mono<String> login(String username, String password) {
+        String clientId = env.getProperty("KEYCLOAK_CLIENT_ID");
+        String clientSecret = env.getProperty("KEYCLOAK_CLIENT_SECRET");
         MultiValueMap<String, String> formMap = new LinkedMultiValueMap<>();
         formMap.add("username", username);
         formMap.add("password", password);
@@ -130,8 +118,15 @@ public class KeycloakRestService {
      */
     public Mono<AccessTokenResponse> loginSecure(String username, String password) {
         try {
+            String keycloakServerUri = env.getProperty("KEYCLOAK_URI");
+            String realm = env.getProperty("KEYCLOAK_REALM");
+            String superUser = env.getProperty("KEYCLOAK_ADMIN_USERNAME");
+            String superPassword = env.getProperty("KEYCLOAK_ADMIN_PASSWORD");
+            String adminCliClientId = "admin-cli";
+            String clientId = env.getProperty("KEYCLOAK_CLIENT_ID");
+            String clientSecret = env.getProperty("KEYCLOAK_CLIENT_SECRET");
             Keycloak keycloak = KeycloakBuilder.builder().serverUrl(keycloakServerUri)
-                    .realm(keycloakRealm)
+                    .realm(realm)
                     .username(username)
                     .password(password)
                     .clientId(clientId)
@@ -142,11 +137,11 @@ public class KeycloakRestService {
         } catch (NotAuthorizedException err) {
             logger.error("Unauthorized access: " + err.getMessage());
             err.printStackTrace();
-            return Mono.error(err);
+            return Mono.empty();
         } catch (Exception err) {
             logger.error("Unexpected error when login: " + err.getMessage());
             err.printStackTrace();
-            return Mono.error(err);
+            return Mono.empty();
         }
     }
 
@@ -204,10 +199,11 @@ public class KeycloakRestService {
     }
 
     private Optional<UserResource> createKeycloakUser(UserRegistrationDto userDto) {
-        String realm = keycloakRealm;
-        String superUser = keycloakSuperUsername;
-        String superPassword = keycloakSuperPassword;
-        String adminCliClientId = keycloakAdminCliClientId;
+        String keycloakServerUri = env.getProperty("KEYCLOAK_URI");
+        String realm = env.getProperty("KEYCLOAK_REALM");
+        String superUser = env.getProperty("KEYCLOAK_ADMIN_USERNAME");
+        String superPassword = env.getProperty("KEYCLOAK_ADMIN_PASSWORD");
+        String adminCliClientId = "admin-cli";
         Keycloak keycloakRealm = Keycloak.getInstance(keycloakServerUri, realm, superUser, superPassword, adminCliClientId);
         UsersResource usersResource = keycloakRealm.realm(realm).users();
 
@@ -272,10 +268,11 @@ public class KeycloakRestService {
     }
 
     private Mono<Boolean> updateKeycloakUser(UserUpdateDto userDto) {
-        String realm = keycloakRealm;
-        String superUser = keycloakSuperUsername;
-        String superPassword = keycloakSuperPassword;
-        String adminCliClientId = keycloakAdminCliClientId;
+        String keycloakServerUri = env.getProperty("KEYCLOAK_URI");
+        String realm = env.getProperty("KEYCLOAK_REALM");
+        String superUser = env.getProperty("KEYCLOAK_ADMIN_USERNAME");
+        String superPassword = env.getProperty("KEYCLOAK_ADMIN_PASSWORD");
+        String adminCliClientId = "admin-cli";
         Keycloak keycloakRealm = Keycloak.getInstance(keycloakServerUri, realm, superUser, superPassword, adminCliClientId);
         UsersResource usersResource = keycloakRealm.realm(realm).users();
 
@@ -309,4 +306,5 @@ public class KeycloakRestService {
             return Mono.error(new Error(err.getMessage()));
         }
     }
+
 }

@@ -11,6 +11,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,15 +26,20 @@ public class ChatController {
     @Autowired
     private ChatRoomService chatRoomService;
 
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessage chatMessage) {
         String chatId = chatRoomService
-                .getChatId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true).get();
+                .getChatId(chatMessage.getSenderId(), chatMessage.getRecipientId(), chatMessage.getQuestId(), true).get();
         chatMessage.setChatId(chatId);
 
         ChatMessage saved = chatMessageService.save(chatMessage);
         messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(),"/queue/messages",
+                chatMessage.getRecipientId() + "_" + chatMessage.getQuestId(),"/queue/messages",
                 new ChatNotification(
                         saved.getId(),
                         saved.getSenderId(),
@@ -50,17 +56,24 @@ public class ChatController {
                 .ok(chatMessageService.countNewMessages(senderId, recipientId));
     }
 
-    @GetMapping("/messages/{senderId}/{recipientId}")
+    @GetMapping("/messages/{senderId}/{recipientId}/{questId}")
     public ResponseEntity<?> findChatMessages ( @PathVariable String senderId,
-                                                @PathVariable String recipientId) {
+                                                @PathVariable String recipientId,
+                                                @PathVariable String questId) {
         return ResponseEntity
-                .ok(chatMessageService.findChatMessages(senderId, recipientId));
+                .ok(chatMessageService.findChatMessages(senderId, recipientId, questId));
     }
 
     @GetMapping("/messages/{id}")
     public ResponseEntity<?> findMessage (@PathVariable String id) {
         return ResponseEntity
                 .ok(chatMessageService.findById(id));
+    }
+
+    @GetMapping("/rooms")
+    public ResponseEntity<?> findChatRoomsById(JwtAuthenticationToken token) {
+        String username = (String) token.getToken().getClaims().get("preferred_username");
+        return ResponseEntity.ok(chatRoomService.getUserChatRooms(username));
     }
 
 }

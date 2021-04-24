@@ -59,5 +59,10 @@ spec:
         - name: MONGODB_CONNECTION_STRING
           valueFrom:
             secretKeyRef:
-              name: db-secret
+              name: chatsvc-db-secret
               key: mongodbconnstr
+        - name: OAUTH2SERVER_JWKURI
+          valueFrom:
+            secretKeyRef:
+              name: usersvc-db-secret
+              key: oauth2server_jwkuri

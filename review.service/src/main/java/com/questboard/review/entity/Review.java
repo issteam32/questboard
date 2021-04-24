@@ -103,9 +103,9 @@ public class Review {
         return "Review{" +
                 "id=" + id +
                 ", questId=" + questId +
-                ", reviewer='" + reviewer + '\'' +
-                ", questTaker='" + questTaker + '\'' +
-                ", reviewMsg='" + reviewMsg + '\'' +
+                ", reviewer='" + reviewer +
+                ", questTaker='" + questTaker +
+                ", reviewMsg='" + reviewMsg +
                 ", createdDate=" + createdDate +
                 ", updatedDate=" + updatedDate +
                 '}';

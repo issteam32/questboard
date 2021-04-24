@@ -1,5 +1,7 @@
 package com.questboard.quest.util;
 
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.questboard.quest.dto.ConcernAnswerJson;
 import com.questboard.quest.dto.ConcernValidationJson;
@@ -8,23 +10,44 @@ import com.questboard.quest.dto.SkillSetProfileDto;
 import com.questboard.quest.strategy.QuestMatchingContext;
 import com.questboard.quest.strategy.impl.MonetaryMatchingStrategy;
 import com.questboard.quest.strategy.impl.TimeMatchingStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT;
 
 public class ServiceUtils {
+    private static final Logger logger = LoggerFactory.getLogger("ServiceUtils");
     public static Double proposalScoreCounting(String json, List<ConcernValidationJson> concernValidationJsonList,
                                                String skillRequired, List<SkillSetProfileDto> skillSetProfileDto) {
-        final ObjectMapper om = new ObjectMapper();
-        ProposalJson proposalJson = om.convertValue(json, ProposalJson.class);
-        Double concernEvaluationScore = concernEvaluation(concernValidationJsonList, proposalJson.getConcernAnswered());
+        try {
+            final ObjectMapper om = new ObjectMapper();
+            om.enable(ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+            om.configure(ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+            ProposalJson proposalJson = om.readValue(json, ProposalJson.class);
 
-        List<String> skillsRequiredList = Arrays.asList(skillRequired.split(",").clone());
-        Double skillsetEvaluationScore = skillsetEvaluation(skillsRequiredList, skillSetProfileDto);
+            logger.debug("validation list: {}", concernValidationJsonList);
+            logger.debug("proposal json: {}", proposalJson);
 
-        return ((concernEvaluationScore / 100.0) * 60) + ((skillsetEvaluationScore / 100.0) * 40);
+            Double concernEvaluationScore = concernEvaluation(concernValidationJsonList, proposalJson.getConcernAnswered());
+
+            List<String> skillsRequiredList = Arrays.asList(skillRequired.split(",").clone());
+            Double skillsetEvaluationScore = skillsetEvaluation(skillsRequiredList, skillSetProfileDto);
+
+            logger.info("proposal concern evaluation: {}", concernEvaluationScore);
+            logger.info("skillset evaluation: {}", skillsetEvaluationScore);
+
+            return ((concernEvaluationScore / 100.0) * 60) + ((skillsetEvaluationScore / 100.0) * 40);
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            logger.error(exception.getStackTrace().toString());
+            return 30.0;
+        }
     }
 
     /**
@@ -34,32 +57,32 @@ public class ServiceUtils {
      */
     private static Double concernEvaluation(List<ConcernValidationJson> concernValidationJsons,
                                             List<ConcernAnswerJson> concernAnswerJsons) {
-        int match = 0;
-        int totalConcernSize = concernAnswerJsons.size();
-        match = concernValidationJsons.stream()
-                .map(validation ->
-                        concernAnswerJsons.stream()
-                                .filter(answer -> validation.getConcern().equals(answer.getConcern()))
-                                .map(answer -> {
-                                    if (validation.getConcern().equals("time")) {
-                                        QuestMatchingContext context = new QuestMatchingContext(new TimeMatchingStrategy(), validation, answer);
-                                        return context.executeStrategy();
-                                    } else if (validation.getConcern().equals("money")) {
-                                        QuestMatchingContext context = new QuestMatchingContext(new MonetaryMatchingStrategy(), validation, answer);
-                                        return context.executeStrategy();
-                                    }
-                                    return 0;
-                                })
-                ).mapToInt(m -> m.findFirst().isPresent() ? m.findFirst().get() : 0).sum();
-        if (match == 0) {
+        Double match = 0.0;
+        for (ConcernValidationJson validation: concernValidationJsons) {
+            for (ConcernAnswerJson answer: concernAnswerJsons) {
+                if (validation.getConcern().equalsIgnoreCase(answer.getConcern())) {
+                    if ("time".equalsIgnoreCase(validation.getConcern())) {
+                        QuestMatchingContext context = new QuestMatchingContext(new TimeMatchingStrategy(), validation, answer);
+                        match += context.executeStrategy();
+                    } else if ("money".equalsIgnoreCase(validation.getConcern())) {
+                        QuestMatchingContext context = new QuestMatchingContext(new MonetaryMatchingStrategy(), validation, answer);
+                        match += context.executeStrategy();
+                    } else {
+                        match += 0;
+                    }
+                }
+            }
+        }
+        Double totalConcernSize = concernAnswerJsons.size() * 1.0;
+        if (match == 0.0) {
             return 0.0;
         }
         return (match / totalConcernSize) * 100.0;
     }
 
     private static Double skillsetEvaluation(List<String> skills, List<SkillSetProfileDto> skillSetProfileList) {
-        int match = 0;
-        int totalSkillRequired = skills.size();
+        Double match = 0.0;
+        Double totalSkillRequired = skills.size() * 1.0;
         for (String skill: skills) {
             for (SkillSetProfileDto skillSetProfile: skillSetProfileList) {
                 if (skillSetProfile.getSkill().equals(skill)) {

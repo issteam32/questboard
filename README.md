@@ -1,3 +1,7 @@
+Travis Build
+
+![alt text](https://travis-ci.com/issteam32/questboard.svg?branch=master)
+
 # questboard
 ISS Project - QuestBoard
 

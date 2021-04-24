@@ -31,7 +31,7 @@ public interface QuestService {
     public Mono<Quest> createNewQuest(Quest quest);
     public Mono<Quest> updateQuest(Quest quest);
     public Mono<Void> deleteQuest(Integer id);
-    public Mono<Boolean> awardQuest(Integer id, Integer awardedTo);
+    public Mono<Boolean> awardQuest(Integer id, String awardedTo);
     public Mono<QuestProposal> createQuestProposal(QuestProposal questProposal, List<SkillSetProfileDto> skillSetProfileDto);
     public Mono<QuestFlow> initialNewQuestFlow(Integer questId);
     public Mono<QuestFlow> updateQuestFlow(QuestFlow questFlow);
@@ -43,5 +43,15 @@ public interface QuestService {
     public Mono<Void> deleteQuestRequirement(Integer id);
     public Mono<QuestWithProposal> getQuestWithProposal(Integer questId);
     public Flux<QuestProposal> getQuestProposal(String userName);
+    public Mono<QuestUserConcern> createQuestUserConcern(QuestUserConcern questUserConcern);
+    public Mono<Void> deleteQuestUserConcern(Integer id);
+    public Mono<Void> evaluateQuestProposal(Integer questId);
+    public Mono<Void> deleteQuestProposal(Integer id);
+    public Mono<QuestTakerRequest> createQuestTakerRequest(QuestTakerRequest questTakerRequest);
+    public Mono<QuestTakerRequest> updateQuestTakerRequest(Integer id, String status);
+    public Flux<QuestTakerRequest> getQuestTakerRequestByQuestId(Integer questId);
+    public Mono<QuestTakerRequest> getQuestTakerRequestById(Integer id);
+    public Mono<Void> deleteQuestTakerRequest(Integer id);
+
 }
 

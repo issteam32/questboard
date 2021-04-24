@@ -1,9 +1,8 @@
-package com.questboard.quest.config;
+package com.questboard.chat.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -11,7 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import java.util.Objects;
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private Environment env;
@@ -19,14 +18,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         String jwkSetUri = Objects.requireNonNull(env.getProperty("OAUTH2SERVER_JWKURI"));
-        System.out.println("################## user env variable ###################");
+        System.out.println("################## chat env variable ###################");
         System.out.println(jwkSetUri);
-        System.out.println("################## user env variable ###################");
+        System.out.println("################## chat env variable ###################");
         http.cors()
                 .and()
+                .authorizeRequests().antMatchers("/ws/**")
+                .permitAll()
+                .and()
                 .authorizeRequests(authorize -> authorize
-                        .antMatchers("/api/q/v1/health-check").permitAll()
-                        .antMatchers("/api/**").authenticated()
+                        .antMatchers("/health-check").permitAll()
+                        .antMatchers("/**").authenticated()
+//                        .antMatchers("/**").permitAll()
                 )
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt ->

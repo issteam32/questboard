@@ -2,12 +2,10 @@ package com.questboard.quest.controller;
 
 import com.questboard.quest.dto.QuestWithProposal;
 import com.questboard.quest.dto.SkillSetProfileDto;
-import com.questboard.quest.entity.Quest;
-import com.questboard.quest.entity.QuestFlow;
-import com.questboard.quest.entity.QuestProposal;
-import com.questboard.quest.entity.QuestRequirement;
+import com.questboard.quest.entity.*;
 import com.questboard.quest.enums.QuestCategory;
 import com.questboard.quest.repository.QuestRequirementRepository;
+import com.questboard.quest.repository.QuestTakerRequestRepository;
 import com.questboard.quest.service.QuestService;
 import com.questboard.quest.util.ReqBodyUtils;
 import org.slf4j.Logger;
@@ -35,6 +33,11 @@ public class QuestController {
 
     @Autowired
     private QuestService questService;
+
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
 
     @RequestMapping(value = "/quest/{id}", method = RequestMethod.GET)
     public Mono<Quest> getQuestById(@PathVariable("id") Integer id) {
@@ -66,8 +69,11 @@ public class QuestController {
     }
 
     @RequestMapping(value = "/quest", method = RequestMethod.POST)
-    public Mono<Quest> createQuest(@RequestBody HashMap<String, Object> param) {
+    public Mono<Quest> createQuest(JwtAuthenticationToken token, @RequestBody HashMap<String, Object> param) {
+        String username = token.getToken().getClaim("preferred_username");
         Quest quest = (Quest)ReqBodyUtils.convertValue(param, Quest.class);
+        quest.setStatus("PUBLISHED");
+        quest.setRequestor(username);
         return this.questService.createNewQuest(quest)
                 .onErrorResume(error -> {
                     logger.error("Creating new quest, error: {}", error.getMessage());
@@ -81,6 +87,7 @@ public class QuestController {
             return Mono.error(new Error("No id provided"));
         }
         Quest quest = (Quest) ReqBodyUtils.convertValue(param, Quest.class);
+        quest.setId(id);
         return this.questService.updateQuest(quest)
                 .onErrorResume(error -> {
                     logger.error("Update quest, error: {}", error.getMessage());
@@ -118,23 +125,23 @@ public class QuestController {
         if (id == null || param.isEmpty()) {
             return Mono.just(false);
         } else {
-            Integer userId;
+            String username;
             if (param.containsKey("awardTo")) {
-                userId = Integer.parseInt(param.get("awardTo"));
+                username = param.get("awardTo");
             } else {
                 return Mono.just(false);
             }
-            return this.questService.awardQuest(id, userId);
+            return this.questService.awardQuest(id, username);
         }
     }
 
     @RequestMapping(value = "/quest/proposal", method = RequestMethod.POST)
     public Mono<QuestProposal> createProfessionalQuestProposal(@RequestBody HashMap<String, Object> param) {
-        if (! param.containsKey("proposal") || !param.containsKey("skillsetProfile")) {
+        if (! param.containsKey("proposal") || !param.containsKey("skillSetProfileList")) {
             return Mono.error(new Error("no skillset profile or proposal found!"));
         }
         HashMap<String, Object> proposalMap = (HashMap<String, Object>) param.get("proposal");
-        List<HashMap<String, Object>> skillsetProfileList = new ArrayList(Collections.singletonList(param.get("skillSetProfileList")));
+        List<HashMap<String, Object>> skillsetProfileList = (List<HashMap<String, Object>>)param.get("skillSetProfileList");
         List<SkillSetProfileDto> skillSetProfileDtos = skillsetProfileList.stream()
                 .map(mapObject -> (SkillSetProfileDto)ReqBodyUtils.convertValue(mapObject, SkillSetProfileDto.class))
                 .collect(Collectors.toList());
@@ -147,6 +154,11 @@ public class QuestController {
                     logger.error("Unable to create quest proposal, error: {}", error.getMessage());
                     return Mono.error(new Error(error.getMessage()));
                 });
+    }
+
+    @RequestMapping(value = "/quest/proposal/{id}", method = RequestMethod.DELETE)
+    public Mono<Void> deleteQuestProposal(@PathVariable("id") Integer id) {
+        return this.questService.deleteQuestProposal(id);
     }
 
     @RequestMapping(value = "/quest/flow", method = RequestMethod.POST)
@@ -214,5 +226,88 @@ public class QuestController {
         logger.info("toke username: {}", token.getToken().getClaims().get("preferred_username"));
         String username = (String)token.getToken().getClaims().get("preferred_username");
         return this.questService.getQuestProposal(username);
+    }
+
+    @RequestMapping(value = "/quest/user-concern", method = RequestMethod.POST)
+    public Mono<QuestUserConcern> createQuestUserConcern(@RequestBody HashMap<String, String> param) {
+        logger.info("user concern: {}", param);
+        QuestUserConcern questUserConcern = new QuestUserConcern();
+        if (param.containsKey("context")) {
+            questUserConcern.setContext(param.get("context"));
+        }
+        if (param.containsKey("concernValidation")) {
+            questUserConcern.setConcernValidation(param.get("concernValidation"));
+        }
+        questUserConcern.setQuestId(Integer.parseInt(param.get("questId")));
+        return this.questService.createQuestUserConcern(questUserConcern);
+    }
+
+    @RequestMapping(value = "/quest/proposal-evaluate/{questId}", method = RequestMethod.POST)
+    public Mono<Void> createQuestUserConcern(@PathVariable("questId") Integer questId) {
+        logger.info("quest to reevaluate {}", questId);
+        return this.questService.evaluateQuestProposal(questId);
+    }
+
+    @RequestMapping(value = "/quest/user-concern/{id}", method = RequestMethod.DELETE)
+    public Mono<Void> deleteQuestUserConcern(JwtAuthenticationToken token, @PathVariable("id") Integer id) {
+        logger.info("toke username: {}", token.getToken().getClaims().get("preferred_username"));
+        String username = (String)token.getToken().getClaims().get("preferred_username");
+        return this.questService.getQuestById(id)
+                .flatMap(quest -> {
+                    if (quest.getRequestor().equals(username)) {
+                        return this.questService.deleteQuestUserConcern(id);
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+    }
+
+    @RequestMapping(value = "/quest/quest-taker", method = RequestMethod.POST)
+    public Mono<QuestTakerRequest> createQuestTakerRequest(JwtAuthenticationToken token, @RequestBody Map<String, String> param) {
+        String username = (String)token.getToken().getClaims().get("preferred_username");
+        logger.info("{} wants to create taker request, {}", username, param);
+        QuestTakerRequest questTakerRequest = new QuestTakerRequest();
+        if (param.containsKey("questId")) {
+            questTakerRequest.setQuestId(Integer.parseInt(param.get("questId")));
+        } else {
+            logger.info("no quest id provided");
+            return Mono.empty();
+        }
+        questTakerRequest.setStatus("REQUESTED");
+        questTakerRequest.setUsername(username);
+        return this.questService.createQuestTakerRequest(questTakerRequest);
+    }
+
+    @RequestMapping(value = "/quest/quest-taker", method = RequestMethod.PUT)
+    public Mono<QuestTakerRequest> updateQuestTakerRequest(@RequestBody Map<String, String> param) {
+        String status = "";
+        Integer id = -1;
+        if (param.containsKey("status")) {
+            status = param.get("status");
+        } else {
+            return Mono.empty();
+        }
+
+        if (param.containsKey("id")) {
+            id = Integer.parseInt(param.get("questId"));
+        } else {
+            return Mono.empty();
+        }
+        return this.questService.updateQuestTakerRequest(id, status);
+    }
+
+    @RequestMapping(value = "/quest/quest-taker-quest/{questId}", method = RequestMethod.GET)
+    public Flux<QuestTakerRequest> getQuestTakerRequestByQuestId(@PathVariable("questId") Integer questId) {
+        return this.questService.getQuestTakerRequestByQuestId(questId);
+    }
+
+    @RequestMapping(value = "/quest/quest-taker-id/{id}", method = RequestMethod.GET)
+    public Mono<QuestTakerRequest> getQuestTakerRequestById(@PathVariable("id") Integer id) {
+        return this.questService.getQuestTakerRequestById(id);
+    }
+
+    @RequestMapping(value = "/quest/quest-taker/{id}", method = RequestMethod.DELETE)
+    public Mono<Void> deleteQuestTakerRequest(@PathVariable("id") Integer id) {
+        return this.questService.deleteQuestTakerRequest(id);
     }
 }

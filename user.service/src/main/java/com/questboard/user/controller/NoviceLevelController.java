@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,25 +26,43 @@ public class NoviceLevelController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(value = "/novicelvl/{userId}", method = RequestMethod.GET)
-    public Mono<NoviceLevel> getUserNoviceLevel(@PathVariable("userId") Integer userId) {
-        return this.noviceLevelService.getUserNoviceLevel(userId)
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
+    @RequestMapping(value = "/novicelvl", method = RequestMethod.GET)
+    public Mono<NoviceLevel> getUserNoviceLevel(JwtAuthenticationToken jwtToken) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userService.getUserByUserName(username)
+                .flatMap(user -> this.noviceLevelService.getUserNoviceLevel(user.getId()))
                 .onErrorResume(error -> {
-                    logger.error("Unable to retrive user (id: {}) novice level, error: {}", userId, error.getMessage());
+                    logger.error("Unable to retrive user (id: {}) novice level, error: {}", username, error.getMessage());
                     return Mono.error(new Error(error.getMessage()));
                 });
     }
 
-    @RequestMapping(value = "/novicelvl/{userId}", method = RequestMethod.POST)
-    public Mono<NoviceLevel> createUserNoviceLevelProfile(@PathVariable("userId") Integer userId) {
-        NoviceLevel noviceLevel = new NoviceLevel();
-        if (userId == null) {
-            return Mono.error(new Error("User id not provided"));
-        }
-        noviceLevel.setUserId(userId);
-        return this.noviceLevelService.createNoviceLevel(noviceLevel)
+    @RequestMapping(value = "/user-novicelvl/{userId}", method = RequestMethod.GET)
+    public Mono<NoviceLevel> getUserNoviceLevel(@PathVariable("userId") Integer userId) {
+        return this.noviceLevelService.getUserNoviceLevel(userId)
                 .onErrorResume(error -> {
-                    logger.error("Unable to create user (id: {}) novice level, error: {}", userId, error.getMessage());
+                    logger.error("Unable to retrive user (id: {}) novice level, error: {}", userId  , error.getMessage());
+                    return Mono.error(new Error(error.getMessage()));
+                });
+    }
+
+
+    @RequestMapping(value = "/novicelvl", method = RequestMethod.POST)
+    public Mono<NoviceLevel> createUserNoviceLevelProfile(JwtAuthenticationToken jwtToken) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userService.getUserByUserName(username)
+                .flatMap(user -> {
+                    NoviceLevel noviceLevel = new NoviceLevel();
+                    noviceLevel.setUserId(user.getId());
+                    return this.noviceLevelService.createNoviceLevel(noviceLevel);
+                })
+                .onErrorResume(error -> {
+                    logger.error("Unable to create user (id: {}) novice level, error: {}", username, error.getMessage());
                     return Mono.error(new Error(error.getMessage()));
                 });
     }
