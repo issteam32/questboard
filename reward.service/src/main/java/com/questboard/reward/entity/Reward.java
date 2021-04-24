@@ -1,5 +1,4 @@
-package com.questboard.review.entity;
-
+package com.questboard.reward.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -10,34 +9,40 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.LocalDateTime;
 
 @Data
-@Table("review")
-public class Review {
+@Table("reward")
+public class Reward {
     @Id
     private Integer id;
     @Column("quest_id")
     private Integer questId;
-    @Column("reviewer")
-    private String reviewer;
+    @Column("quest_giver")
+    private String questGiver;
     @Column("quest_taker")
     private String questTaker;
-    @Column("review_msg")
-    private String reviewMsg;
+    @Column("initial_amount")
+    private Integer initialAmount;
+    @Column("proposed_amount")
+    private Integer proposedAmount;
+    @Column("status")
+    private Integer status;
     @Column("created_date")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdDate;
-    @Column("updated_date")
+    @Column("created_date")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDate;
 
-    public Review() {
+    public Reward() {
     }
 
-    public Review(Integer id, Integer questId, String reviewer, String questTaker, String reviewMsg, LocalDateTime createdDate, LocalDateTime updatedDate) {
+    public Reward(Integer id, Integer questId, String questGiver, String questTaker, Integer initialAmount, Integer proposedAmount, Integer status, LocalDateTime createdDate, LocalDateTime updatedDate) {
         this.id = id;
         this.questId = questId;
-        this.reviewer = reviewer;
+        this.questGiver = questGiver;
         this.questTaker = questTaker;
-        this.reviewMsg = reviewMsg;
+        this.initialAmount = initialAmount;
+        this.proposedAmount = proposedAmount;
+        this.status = status;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
     }
@@ -58,12 +63,12 @@ public class Review {
         this.questId = questId;
     }
 
-    public String getReviewer() {
-        return reviewer;
+    public String getQuestGiver() {
+        return questGiver;
     }
 
-    public void setReviewer(String reviewer) {
-        this.reviewer = reviewer;
+    public void setQuestGiver(String questGiver) {
+        this.questGiver = questGiver;
     }
 
     public String getQuestTaker() {
@@ -74,12 +79,28 @@ public class Review {
         this.questTaker = questTaker;
     }
 
-    public String getReviewMsg() {
-        return reviewMsg;
+    public Integer getInitialAmount() {
+        return initialAmount;
     }
 
-    public void setReviewMsg(String reviewMsg) {
-        this.reviewMsg = reviewMsg;
+    public void setInitialAmount(Integer initialAmount) {
+        this.initialAmount = initialAmount;
+    }
+
+    public Integer getProposedAmount() {
+        return proposedAmount;
+    }
+
+    public void setProposedAmount(Integer proposedAmount) {
+        this.proposedAmount = proposedAmount;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedDate() {
@@ -100,12 +121,14 @@ public class Review {
 
     @Override
     public String toString() {
-        return "Review{" +
+        return "Reward{" +
                 "id=" + id +
                 ", questId=" + questId +
-                ", reviewer='" + reviewer +
-                ", questTaker='" + questTaker +
-                ", reviewMsg='" + reviewMsg +
+                ", questGiver='" + questGiver + '\'' +
+                ", questTaker='" + questTaker + '\'' +
+                ", initialAmount=" + initialAmount +
+                ", proposedAmount=" + proposedAmount +
+                ", status=" + status +
                 ", createdDate=" + createdDate +
                 ", updatedDate=" + updatedDate +
                 '}';

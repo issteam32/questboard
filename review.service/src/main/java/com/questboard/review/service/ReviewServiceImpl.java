@@ -2,6 +2,8 @@ package com.questboard.review.service;
 
 import com.questboard.review.entity.Review;
 import com.questboard.review.repository.ReviewRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import reactor.core.publisher.Mono;
 @Service
 public class ReviewServiceImpl implements ReviewService{
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private ReviewRepository reviewRepository;
 
@@ -21,25 +25,28 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     public Flux<Review> getAllReview() {
+        logger.info("GET - " + this.reviewRepository.findAll().toString());
         return this.reviewRepository.findAll();
     }
 
     public Mono<Review> getReviewById(int id) {
+        logger.info("GET - " + this.reviewRepository.findById(id).toString());
         return this.reviewRepository.findById(id);
     }
 
-    public Flux<Review> getReviewByQuestId(Integer quest_id, Pageable paging) {
-
-        return this.reviewRepository.findByQuestId(quest_id, paging);
+    public Flux<Review> getReviewByQuestId(Integer questId, Pageable paging) {
+        logger.info("GET - " + this.reviewRepository.findByQuestId(questId, paging).toString());
+        return this.reviewRepository.findByQuestId(questId, paging);
     }
 
-    public Flux<Review> getReviewByQuestTaker(String quest_taker, Pageable paging) {
-
-        return this.reviewRepository.findByQuestTaker(quest_taker, paging);
+    public Flux<Review> getReviewByQuestTaker(String questTaker, Pageable paging) {
+        logger.info("GET - " + this.reviewRepository.findByQuestTaker(questTaker, paging).toString());
+        return this.reviewRepository.findByQuestTaker(questTaker, paging);
     }
 
     @Transactional
     public Mono<Review> createReview(Review review) {
+        logger.info("CREATE REVIEW - " + review.toString());
         return this.reviewRepository.save(review);
     }
 
@@ -47,8 +54,9 @@ public class ReviewServiceImpl implements ReviewService{
     public Mono<Review> updateReview(int id, Review review) {
         return this.reviewRepository.findById(id)
                 .flatMap(r -> {
-                    if(r != null && r.getReviewer() == review.getReviewer()){
+                    if(r != null && r.getReviewer().equals(review.getReviewer())){
                         r.setReviewMsg(review.getReviewMsg());
+                        logger.info("UPDATE REVIEW - " + r.toString());
                     }
                     return this.reviewRepository.save(r);
                 })
@@ -57,6 +65,7 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Transactional
     public Mono<Void> deleteReview(int id){
+        logger.info("DELETE REVIEW - " + this.reviewRepository.findById(id).toString());
         return this.reviewRepository.findById(id)
                 .flatMap(this.reviewRepository::delete);
     }

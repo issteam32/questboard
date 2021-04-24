@@ -9,12 +9,14 @@ then
   ./init-script/chat-service-build.sh skip-test
   ./init-script/review-service-build.sh skip-test
 #  ./init-script/demo-service-build.sh skip-test
+  ./init-script/reward-service-build.sh skip-test
 else
   ./init-script/user-service-build.sh local-build
   ./init-script/quest-service-build.sh local-build
   ./init-script/chat-service-build.sh local-build
   ./init-script/review-service-build.sh local-build
 #  ./init-script/demo-service-build.sh
+  ./init-script/reward-service-build.sh local-build
 fi
 
 echo -e "[${BYellow}DEPLOY-MESSAGE${Color_Off}] --- deploying using skaffold ---"
