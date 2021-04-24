@@ -18,9 +18,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         String jwkSetUri = Objects.requireNonNull(env.getProperty("OAUTH2SERVER_JWKURI"));
-        System.out.println("################## review env variable ###################");
+        System.out.println("################## reward env variable ###################");
         System.out.println(jwkSetUri);
-        System.out.println("################## review env variable ###################");
+        System.out.println("################## reward env variable ###################");
         http.cors()
                 .and()
                 .csrf().disable()
