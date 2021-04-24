@@ -7,6 +7,8 @@ docker push $DOCKER_REPO/chat-service:latest
 docker push $DOCKER_REPO/chat-service:$GIT_SHA
 docker push $DOCKER_REPO/review-service:latest
 docker push $DOCKER_REPO/review-service:$GIT_SHA
+docker push $DOCKER_REPO/reward-service:latest
+docker push $DOCKER_REPO/reward-service:$GIT_SHA
 
 echo "#########################################"
 echo "SHA value"

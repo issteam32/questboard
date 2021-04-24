@@ -25,7 +25,13 @@ docker build -t issteam32/review-service:latest -t issteam32/review-service:$GIT
 
 cd -
 
-echo "SHA value\n"
+./init-script/reward-service-build.sh
+cd ./reward.service/
+docker build -t issteam32/reward-service:latest -t issteam32/reward-service:$GIT_SHA -f Dockerfile.prod .
+
+echo "#########################################"
+echo "SHA value"
+echo "#########################################"
 echo $GIT_SHA
 
 echo -e "[TRAVIS-BUILD-MESSAGE] --- done ---"
