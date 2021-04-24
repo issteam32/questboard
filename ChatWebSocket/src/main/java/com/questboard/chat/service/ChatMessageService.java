@@ -34,10 +34,10 @@ public class ChatMessageService {
                 senderId, recipientId, MessageStatus.RECEIVED);
     }
 
-    public List<ChatMessage> findChatMessages(String senderId, String recipientId) {
-        Optional<String> chatId = chatRoomService.getChatId(senderId, recipientId, false);
+    public List<ChatMessage> findChatMessages(String senderId, String recipientId, String questId) {
+        Optional<String> chatId = chatRoomService.getChatId(senderId, recipientId, questId, false);
 
-        List messages = chatId.map(cId -> repository.findByChatId(cId)).orElse(new ArrayList<>());
+        List<ChatMessage> messages = chatId.map(cId -> repository.findByChatId(cId)).orElse(new ArrayList<>());
 
         if(messages.size() > 0) {
             updateStatuses(senderId, recipientId, MessageStatus.DELIVERED);

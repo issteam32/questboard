@@ -3,19 +3,24 @@ package com.questboard.user.controller;
 import com.questboard.user.dto.SkillSetProfileAndLevelDto;
 import com.questboard.user.entity.SkillSetProfile;
 import com.questboard.user.entity.User;
+import com.questboard.user.enums.Skill;
 import com.questboard.user.response.RespBody;
 import com.questboard.user.service.ProfessionalLevelService;
 import com.questboard.user.service.SkillSetProfileService;
+import com.questboard.user.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -29,6 +34,14 @@ public class SkillSetProfilerController {
 
     @Autowired
     private ProfessionalLevelService professionalLevelService;
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
 
     @RequestMapping(value = "/user-skillset-profile/{id}", method = RequestMethod.GET)
     public Flux<SkillSetProfileAndLevelDto> getUserSkillSetProfile(@PathVariable("id") Integer userId) {
@@ -56,19 +69,21 @@ public class SkillSetProfilerController {
     }
 
     @RequestMapping(value = "/user-skillset-profile", method = RequestMethod.POST)
-    public Mono<SkillSetProfile> createUserSkillSetProfile(@RequestBody HashMap<String, String> param) {
-        SkillSetProfile skillSetProfile = new SkillSetProfile();
-        if (param.containsKey("userId")) {
-            skillSetProfile.setUserId(Integer.parseInt(param.get("userId")));
-        }
-        if (param.containsKey("skill")) {
-            skillSetProfile.setSkill(param.get("skill"));
-        }
-        if (param.containsKey("skillDesc")) {
-            skillSetProfile.setSkillDesc(param.get("skillDesc"));
-        }
-        return this.skillSetProfileService.createSkillSetProfile(skillSetProfile)
-                .map(ssp -> ssp)
+    public Mono<SkillSetProfile> createUserSkillSetProfile(JwtAuthenticationToken jwtToken,
+                                                           @RequestBody HashMap<String, String> param) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userService.getUserByUserName(username)
+                .flatMap(user -> {
+                    SkillSetProfile skillSetProfile = new SkillSetProfile();
+                    skillSetProfile.setUserId(user.getId());
+                    if (param.containsKey("skill")) {
+                        skillSetProfile.setSkill(param.get("skill"));
+                    }
+                    if (param.containsKey("skillDesc")) {
+                        skillSetProfile.setSkillDesc(param.get("skillDesc"));
+                    }
+                    return this.skillSetProfileService.createSkillSetProfile(skillSetProfile);
+                })
                 .onErrorResume(error -> {
                     logger.error("Error when getting user(id:{}), error: {}", param.get("userId"), error.getMessage());
                     return Mono.error(new Error(error.getMessage()));
@@ -120,6 +135,18 @@ public class SkillSetProfilerController {
     @RequestMapping(value = "/skillset-profile/{id}", method = RequestMethod.DELETE)
     public Mono<Void> deletedSkillSetProfileById(@PathVariable("id") Integer id) {
         return this.skillSetProfileService.deleteSkillSetProfileById(id);
+    }
+
+    @RequestMapping(value = "/list-of-skill", method = RequestMethod.GET)
+    public Mono<Map<String, List<String>>> getListOfAvailableSkills() {
+        Skill[] possibleValues = Skill.values();
+        List<String> skillList = new ArrayList<>();
+        for (Skill skill: possibleValues) {
+            skillList.add(skill.label);
+        }
+        HashMap <String, List<String>> skillListJSON = new HashMap<>();
+        skillListJSON.put("skills", skillList);
+        return Mono.just(skillListJSON);
     }
 
 }

@@ -7,11 +7,13 @@ then
   ./init-script/user-service-build.sh skip-test
   ./init-script/quest-service-build.sh skip-test
   ./init-script/chat-service-build.sh skip-test
+  ./init-script/review-service-build.sh skip-test
 #  ./init-script/demo-service-build.sh skip-test
 else
-  ./init-script/user-service-build.sh
-  ./init-script/quest-service-build.sh
-  ./init-script/chat-service-build.sh
+  ./init-script/user-service-build.sh local-build
+  ./init-script/quest-service-build.sh local-build
+  ./init-script/chat-service-build.sh local-build
+  ./init-script/review-service-build.sh local-build
 #  ./init-script/demo-service-build.sh
 fi
 
