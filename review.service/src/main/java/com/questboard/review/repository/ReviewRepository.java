@@ -9,6 +9,6 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface ReviewRepository extends ReactiveSortingRepository<Review, Integer> {
 
-    Flux<Review> findByQuestid(Integer quest_id, Pageable pageable);
-    Flux<Review> findByQuesttaker(String quest_taker, Pageable pageable);
+    Flux<Review> findByQuestId(Integer questId, Pageable pageable);
+    Flux<Review> findByQuestTaker(String questTaker, Pageable pageable);
 }

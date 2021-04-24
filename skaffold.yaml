@@ -24,6 +24,10 @@ build:
     context: quest.service
     docker:
       dockerfile: Dockerfile
+  - image: reward-service-image
+    context: reward.service
+    docker:
+      dockerfile: Dockerfile
 deploy:
   kubectl:
     manifests:
@@ -32,6 +36,7 @@ deploy:
     - ChatWebSocket/deployment.yaml
     - quest.service/quest.deployment.yaml
     - review.service/review.deployment.yaml
+    - reward.service/reward.deployment.yaml
 portForward:
 - resourceType: service
   resourceName: demo-spring-rx
@@ -48,3 +53,6 @@ portForward:
 - resourceType: service
   resourceName: quest.service
   port: 8088
+- resourceType: service
+  resourceName: reward.service
+  port: 8089

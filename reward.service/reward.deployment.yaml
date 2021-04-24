@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: reward-svc
+  labels:
+    app: reward-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 8089
+      targetPort: 8089
+      nodePort: 30002
+  selector:
+    app: reward-deployment
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: localhost
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: localhost
+subsets:
+  - addresses:
+      - ip: 192.168.49.1
+    ports:
+      -  port: 3308
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reward-deployment
+  labels:
+    app: reward-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reward-deployment
+  template:
+    metadata:
+      labels:
+        app: reward-deployment
+    spec:
+      containers:
+        - name: reward-deployment
+          image: reward-service-image
+          ports:
+            - containerPort: 8089
+              protocol: TCP
+          env:
+            - name: REWARDSVC_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: rewardsvc-db-secret
+                  key: rewardsvc_db_host
+            - name: REWARDSVC_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: rewardsvc-db-secret
+                  key: rewardsvc_db_port
+            - name: REWARDSVC_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rewardsvc-db-secret
+                  key: rewardsvc_db_user
+            - name: REWARDSVC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rewardsvc-db-secret
+                  key: rewardsvc_db_password
+            - name: REWARDSVC_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: rewardsvc-db-secret
+                  key: rewardsvc_db_database
+            - name: OAUTH2SERVER_JWKURI
+              valueFrom:
+                secretKeyRef:
+                  name: rewardsvc-db-secret
+                  key: oauth2server_jwkuri

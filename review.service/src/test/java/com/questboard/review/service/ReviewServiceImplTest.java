@@ -42,18 +42,18 @@ public class ReviewServiceImplTest {
         when(reviewRepository.findById(anyInt())).thenReturn(
                 Flux.just(reviewProviderSet1())
                         .filter(review -> review.getId().equals(1)).next());
-        when(reviewRepository.findByQuestid(anyInt(), isA(Pageable.class))).thenAnswer(
+        when(reviewRepository.findByQuestId(anyInt(), isA(Pageable.class))).thenAnswer(
                 invocationOnMock -> {
                     Object arguments = invocationOnMock.getArguments()[0];
                     return Flux.just(reviewProviderSet1())
-                            .filter(review -> review.getQuest_id().equals(arguments));
+                            .filter(review -> review.getQuestId().equals(arguments));
                 }
         );
-        when(reviewRepository.findByQuesttaker(anyString(), isA(Pageable.class))).thenAnswer(
+        when(reviewRepository.findByQuestTaker(anyString(), isA(Pageable.class))).thenAnswer(
                 invocationOnMock -> {
                     Object arguments = invocationOnMock.getArguments()[0];
                     return Flux.just(reviewProviderSet1())
-                            .filter(review -> review.getQuest_taker().equals(arguments));
+                            .filter(review -> review.getQuestTaker().equals(arguments));
                 }
         );
         when(reviewRepository.save(Mockito.any(Review.class))).thenAnswer(
@@ -63,7 +63,7 @@ public class ReviewServiceImplTest {
                         return new Exception("Error while inserting new review");
                     } else {
                         Review review = (Review) arguments;
-                        if (review != null && review.getQuest_id() != null && review.getReviewer() != null && review.getQuest_taker() != null && !review.getReview_msg().isEmpty()) {
+                        if (review != null && review.getQuestId() != null && review.getReviewer() != null && review.getQuestTaker() != null && !review.getReviewMsg().isEmpty()) {
                             review.setId(reviewProviderSet1().length + 1);
                             return Mono.just(review);
                         } else {
@@ -115,17 +115,17 @@ public class ReviewServiceImplTest {
     public void createReview() {
 
         Review testReview = new Review();
-        testReview.setQuest_id(1);
+        testReview.setQuestId(1);
         testReview.setReviewer("Adrian");
-        testReview.setQuest_taker("Matthew");
-        testReview.setReview_msg("You did a great job");
+        testReview.setQuestTaker("Matthew");
+        testReview.setReviewMsg("You did a great job");
 
         StepVerifier.create(reviewServiceImpl.createReview(testReview))
-                .expectNextMatches(r -> r.getReview_msg().equals("You did a great job"))
+                .expectNextMatches(r -> r.getReviewMsg().equals("You did a great job"))
                 .expectComplete();
 
         testReview = new Review();
-        testReview.setReview_msg("You did a great job");
+        testReview.setReviewMsg("You did a great job");
         StepVerifier.create(reviewServiceImpl.createReview(testReview))
                 .expectError();
     }
@@ -134,15 +134,15 @@ public class ReviewServiceImplTest {
     public void updateReview() {
 
         Review testReview = new Review();
-        testReview.setQuest_id(1);
+        testReview.setQuestId(1);
         testReview.setReviewer("Adrian");
-        testReview.setQuest_taker("Matthew");
-        testReview.setReview_msg("You did a great job");
+        testReview.setQuestTaker("Matthew");
+        testReview.setReviewMsg("You did a great job");
 
         StepVerifier.create(reviewServiceImpl.updateReview(1, testReview))
                 .expectNextMatches(r -> r.getId()!=null
                         && r.getId().equals(1)
-                        && r.getReview_msg().equals("You did a great job"))
+                        && r.getReviewMsg().equals("You did a great job"))
                 .expectComplete();
     }
 

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Pod
+metadata:
+  name: reward-pod
+  labels:
+    app: reward-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reward-pod
+  template:
+    metadata:
+      labels:
+        app: reward-pod
+    spec:
+      containers:
+        - name: reward-pod
+          image: reward-service-image
+          ports:
+            - containerPort: 8083
+              protocol: TCP

@@ -13,9 +13,9 @@ public interface ReviewService {
 
     public Mono<Review> getReviewById(int id);
 
-    public Flux<Review> getReviewByQuestId(Integer quest_id, Pageable paging);
+    public Flux<Review> getReviewByQuestId(Integer questId, Pageable paging);
 
-    public Flux<Review> getReviewByQuestTaker(String quest_taker, Pageable paging);
+    public Flux<Review> getReviewByQuestTaker(String questTaker, Pageable paging);
 
     public Mono<Review> createReview(final Review review);
 
