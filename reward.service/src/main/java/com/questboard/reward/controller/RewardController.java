@@ -20,6 +20,11 @@ public class RewardController {
     @Autowired
     private RewardService service;
 
+    @GetMapping("/health-check")
+    public ResponseEntity<String> redinessCheck() {
+        return ResponseEntity.status(200).body("Ok");
+    }
+
     @GetMapping()
     public ResponseEntity<Flux<Reward>> getAllReward() {
         return ResponseEntity.ok(this.service.getAllReward());

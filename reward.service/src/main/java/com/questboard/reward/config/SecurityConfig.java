@@ -1,17 +1,16 @@
-package com.questboard.review.config;
+package com.questboard.reward.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 import java.util.Objects;
 
-@Configuration
 @EnableWebSecurity
+@Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private Environment env;
@@ -26,7 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests(authorize -> authorize
-                        .antMatchers("/api/review/health-check").permitAll()
+                        .antMatchers("/api/reward/health-check").permitAll()
                         .antMatchers("/api/**").authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->

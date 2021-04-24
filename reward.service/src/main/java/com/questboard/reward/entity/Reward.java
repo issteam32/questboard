@@ -20,9 +20,9 @@ public class Reward {
     @Column("quest_taker")
     private String questTaker;
     @Column("initial_amount")
-    private Integer initialAmount;
+    private Double initialAmount;
     @Column("proposed_amount")
-    private Integer proposedAmount;
+    private Double proposedAmount;
     @Column("status")
     private Integer status;
     @Column("created_date")
@@ -35,7 +35,8 @@ public class Reward {
     public Reward() {
     }
 
-    public Reward(Integer id, Integer questId, String questGiver, String questTaker, Integer initialAmount, Integer proposedAmount, Integer status, LocalDateTime createdDate, LocalDateTime updatedDate) {
+    public Reward(Integer id, Integer questId, String questGiver, String questTaker, Double initialAmount,
+                  Double proposedAmount, Integer status, LocalDateTime createdDate, LocalDateTime updatedDate) {
         this.id = id;
         this.questId = questId;
         this.questGiver = questGiver;
@@ -79,19 +80,19 @@ public class Reward {
         this.questTaker = questTaker;
     }
 
-    public Integer getInitialAmount() {
+    public Double getInitialAmount() {
         return initialAmount;
     }
 
-    public void setInitialAmount(Integer initialAmount) {
+    public void setInitialAmount(Double initialAmount) {
         this.initialAmount = initialAmount;
     }
 
-    public Integer getProposedAmount() {
+    public Double getProposedAmount() {
         return proposedAmount;
     }
 
-    public void setProposedAmount(Integer proposedAmount) {
+    public void setProposedAmount(Double proposedAmount) {
         this.proposedAmount = proposedAmount;
     }
 

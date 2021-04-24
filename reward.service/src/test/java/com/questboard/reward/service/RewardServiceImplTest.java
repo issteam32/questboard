@@ -97,14 +97,14 @@ public class RewardServiceImplTest {
         testReward.setQuestId(1);
         testReward.setQuestGiver("Adrian");
         testReward.setQuestTaker("Matthew");
-        testReward.setInitialAmount(88);
+        testReward.setInitialAmount(88.0);
 
         StepVerifier.create(rewardServiceImpl.createReward(testReward))
                 .expectNextMatches(r -> r.getInitialAmount().equals(88))
                 .expectComplete();
 
         testReward = new Reward();
-        testReward.setInitialAmount(9);
+        testReward.setInitialAmount(9.0);
         StepVerifier.create(rewardServiceImpl.createReward(testReward))
                 .expectError();
     }
@@ -116,8 +116,8 @@ public class RewardServiceImplTest {
         testReward.setQuestId(1);
         testReward.setQuestGiver("Matthew");
         testReward.setQuestTaker("Adam");
-        testReward.setInitialAmount(18);
-        testReward.setProposedAmount(20);
+        testReward.setInitialAmount(18.0);
+        testReward.setProposedAmount(20.0);
         testReward.setStatus(1);
 
         StepVerifier.create(rewardServiceImpl.updateProposedAmount(1, testReward))
@@ -134,8 +134,8 @@ public class RewardServiceImplTest {
         testReward.setQuestId(1);
         testReward.setQuestGiver("Matthew");
         testReward.setQuestTaker("Adam");
-        testReward.setInitialAmount(18);
-        testReward.setProposedAmount(20);
+        testReward.setInitialAmount(18.0);
+        testReward.setProposedAmount(20.0);
         testReward.setStatus(2);
 
         StepVerifier.create(rewardServiceImpl.updateProposedAmount(1, testReward))
@@ -161,15 +161,15 @@ public class RewardServiceImplTest {
 
     Reward[] rewardProviderSet1() {
         return new Reward[] {
-                new Reward(1, 1, "Matthew", "Adam", 18, 20,
+                new Reward(1, 1, "Matthew", "Adam", 18.0, 20.0,
                         1, LocalDateTime.now(), LocalDateTime.now()),
-                new Reward(2, 1, "Matthew", "Bryan", 18, 25,
+                new Reward(2, 1, "Matthew", "Bryan", 18.0, 25.0,
                         1, LocalDateTime.now(), LocalDateTime.now()),
-                new Reward(3, 1, "Matthew", "YongJia",18, 18,
+                new Reward(3, 1, "Matthew", "YongJia",18.0, 18.0,
                         2, LocalDateTime.now(), LocalDateTime.now()),
-                new Reward(4, 2, "Matthew", "Denise", 65, 70,
+                new Reward(4, 2, "Matthew", "Denise", 65.0, 70.0,
                         1, LocalDateTime.now(), LocalDateTime.now()),
-                new Reward(5, 2, "Matthew", "Elaine", 65, 80,
+                new Reward(5, 2, "Matthew", "Elaine", 65.0, 80.0,
                         1, LocalDateTime.now(), LocalDateTime.now())
         };
     }
