@@ -86,3 +86,8 @@ spec:
                 secretKeyRef:
                   name: usersvc-db-secret
                   key: oauth2server_jwkuri
+            - name: USER_CLUSTER
+              valueFrom:
+                secretKeyRef:
+                  name: questsvc-db-secret
+                  key: user_cluster_ip

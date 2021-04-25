@@ -38,4 +38,7 @@ public class UserServiceImpl implements UserService {
         return this.userRepo.findById(id);
     }
 
+    public Flux<User> getUserWithEverydayProfile() {
+        return this.userRepo.findByEveryDayProfile();
+    }
 }

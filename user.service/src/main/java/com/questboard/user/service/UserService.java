@@ -16,4 +16,6 @@ public interface UserService {
     public Mono<User> getUserByEmail(String email);
 
     public Mono<User> getUserById(int id);
+
+    public Flux<User> getUserWithEverydayProfile();
 }

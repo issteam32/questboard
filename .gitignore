@@ -6,3 +6,4 @@ target
 **/quest.service/db/
 .env
 **/secret.yaml
+**/pubsub-secret.yaml

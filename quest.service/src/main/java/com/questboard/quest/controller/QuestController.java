@@ -1,11 +1,11 @@
 package com.questboard.quest.controller;
 
 import com.questboard.quest.dto.QuestWithProposal;
+import com.questboard.quest.dto.QuestWithToken;
 import com.questboard.quest.dto.SkillSetProfileDto;
 import com.questboard.quest.entity.*;
 import com.questboard.quest.enums.QuestCategory;
-import com.questboard.quest.repository.QuestRequirementRepository;
-import com.questboard.quest.repository.QuestTakerRequestRepository;
+import com.questboard.quest.service.ActiveMQSenderService;
 import com.questboard.quest.service.QuestService;
 import com.questboard.quest.util.ReqBodyUtils;
 import org.slf4j.Logger;
@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -33,6 +30,9 @@ public class QuestController {
 
     @Autowired
     private QuestService questService;
+
+    @Autowired
+    private ActiveMQSenderService questSender;
 
     @GetMapping("/health-check")
     public ResponseEntity<String> redinessCheck() {
@@ -75,6 +75,15 @@ public class QuestController {
         quest.setStatus("PUBLISHED");
         quest.setRequestor(username);
         return this.questService.createNewQuest(quest)
+                .flatMap(q -> {
+                    try {
+                        sendQuestAutoAssignSignal(token, q);
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                        logger.error("failed to auto allocate user for quest");
+                    }
+                    return Mono.just(q);
+                })
                 .onErrorResume(error -> {
                     logger.error("Creating new quest, error: {}", error.getMessage());
                     return Mono.error(new Error(error.getMessage()));
@@ -309,5 +318,15 @@ public class QuestController {
     @RequestMapping(value = "/quest/quest-taker/{id}", method = RequestMethod.DELETE)
     public Mono<Void> deleteQuestTakerRequest(@PathVariable("id") Integer id) {
         return this.questService.deleteQuestTakerRequest(id);
+    }
+
+//    @RequestMapping(value = "/produce", method = RequestMethod.GET)
+    private void sendQuestAutoAssignSignal(JwtAuthenticationToken token, Quest quest) throws Exception {
+        logger.info("####     token     #####");
+        logger.info(token.getToken().toString());
+        logger.info("########################");
+
+        QuestWithToken questWithToken = new QuestWithToken(quest, token.getToken().getTokenValue());
+        questSender.send(questWithToken);
     }
 }

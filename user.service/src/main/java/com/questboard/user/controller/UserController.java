@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -44,10 +45,10 @@ public class UserController {
         return ResponseEntity.status(200).body("Ok");
     }
 
-//    @RequestMapping(value = "/user", method = RequestMethod.GET)
-//    public ResponseEntity<Flux<User>> getUsers() {
-//        return ResponseEntity.ok(this.userServiceImpl.getUsers());
-//    }
+    @RequestMapping(value = "/user-with-everyday-profile", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    public ResponseEntity<?> getUsers() {
+        return ResponseEntity.ok(this.userServiceImpl.getUserWithEverydayProfile().collectList().block());
+    }
 
     @RequestMapping(value = "/user/login", method = RequestMethod.POST)
     public Mono<ResponseEntity<AccessTokenResponse>> login(@RequestBody UserLoginDto userLoginDto) {

@@ -15,4 +15,7 @@ public interface UserRepository extends ReactiveCrudRepository<User, Integer> {
     Mono<User> findByUserName(String userName);
     Mono<User> findByEmail(String email);
     Flux<User> findByIdIn(List<Integer> userIdList);
+
+    @Query("select * from app_user u join novice_level n where u.id = n.user_id")
+    Flux<User> findByEveryDayProfile();
 }
