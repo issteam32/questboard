@@ -76,11 +76,13 @@ public class QuestController {
         quest.setRequestor(username);
         return this.questService.createNewQuest(quest)
                 .flatMap(q -> {
-                    try {
-                        sendQuestAutoAssignSignal(token, q);
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
-                        logger.error("failed to auto allocate user for quest");
+                    if (q.getCategory() == 0) {
+                        try {
+                            sendQuestAutoAssignSignal(token, q);
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            logger.error("failed to auto allocate user for quest");
+                        }
                     }
                     return Mono.just(q);
                 })

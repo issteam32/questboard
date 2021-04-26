@@ -105,6 +105,9 @@ class QuestServiceImpl implements QuestService {
                     if (quest.getCategory() != null) {
                         q.setCategory(quest.getCategory());
                     }
+                    if (quest.getCategoryDesc() != null) {
+                        q.setCategoryDesc(quest.getCategoryDesc());
+                    }
                     if (quest.getDescription() != null) {
                         q.setDescription(quest.getDescription());
                     }

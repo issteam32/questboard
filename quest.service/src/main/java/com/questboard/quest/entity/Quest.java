@@ -21,6 +21,9 @@ public class Quest {
     @Column("category")
     private Integer category;
 
+    @Column("category_desc")
+    private String categoryDesc;
+
     @Column("skill_required")
     private String skillRequired;
 
@@ -56,14 +59,16 @@ public class Quest {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedDate;
 
-
-    public Quest(Integer id, String title, String description, Integer category, String location, Integer difficultyLevel,
-                 String status, Boolean awarded, String requestor, Integer rewardType, String reward, String awardedTo,
-                 LocalDateTime createdDate, LocalDateTime updatedDate) {
+    public Quest(Integer id, String title, String description, Integer category, String categoryDesc, String skillRequired,
+                 String location, Integer difficultyLevel, String status, Boolean awarded, String requestor,
+                 Integer rewardType, String reward, String awardedTo, LocalDateTime createdDate,
+                 LocalDateTime updatedDate) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.category = category;
+        this.categoryDesc = categoryDesc;
+        this.skillRequired = skillRequired;
         this.location = location;
         this.difficultyLevel = difficultyLevel;
         this.status = status;
@@ -198,5 +203,13 @@ public class Quest {
 
     public void setAwardedTo(String awardedTo) {
         this.awardedTo = awardedTo;
+    }
+
+    public String getCategoryDesc() {
+        return categoryDesc;
+    }
+
+    public void setCategoryDesc(String categoryDesc) {
+        this.categoryDesc = categoryDesc;
     }
 }
