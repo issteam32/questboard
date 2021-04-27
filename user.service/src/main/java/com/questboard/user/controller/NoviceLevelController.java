@@ -31,22 +31,22 @@ public class NoviceLevelController {
         return ResponseEntity.status(200).body("Ok");
     }
 
-    @RequestMapping(value = "/novicelvl", method = RequestMethod.GET)
-    public Mono<NoviceLevel> getUserNoviceLevel(JwtAuthenticationToken jwtToken) {
-        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
-        return this.userService.getUserByUserName(username)
-                .flatMap(user -> this.noviceLevelService.getUserNoviceLevel(user.getId()))
+    @RequestMapping(value = "/novicelvl/{id}", method = RequestMethod.GET)
+    public Mono<NoviceLevel> getUserNoviceLevelById(@PathVariable("id") Integer id) {
+        return this.noviceLevelService.getNoviceLevelById(id)
                 .onErrorResume(error -> {
-                    logger.error("Unable to retrive user (id: {}) novice level, error: {}", username, error.getMessage());
+                    logger.error("Unable to retrive user (id: {}) novice level, error: {}", id, error.getMessage());
                     return Mono.error(new Error(error.getMessage()));
                 });
     }
 
-    @RequestMapping(value = "/user-novicelvl/{userId}", method = RequestMethod.GET)
-    public Mono<NoviceLevel> getUserNoviceLevel(@PathVariable("userId") Integer userId) {
-        return this.noviceLevelService.getUserNoviceLevel(userId)
+    @RequestMapping(value = "/user-novicelvl", method = RequestMethod.GET)
+    public Mono<NoviceLevel> getUserNoviceLevel(JwtAuthenticationToken token) {
+        String username = (String)token.getToken().getClaims().get("preferred_username");
+        return this.userService.getUserByUserName(username)
+                .flatMap(user -> this.noviceLevelService.getUserNoviceLevel(user.getId()))
                 .onErrorResume(error -> {
-                    logger.error("Unable to retrive user (id: {}) novice level, error: {}", userId  , error.getMessage());
+                    logger.error("Unable to retrive user (id: {}) novice level, error: {}", username  , error.getMessage());
                     return Mono.error(new Error(error.getMessage()));
                 });
     }

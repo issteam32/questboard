@@ -43,9 +43,12 @@ public class SkillSetProfilerController {
         return ResponseEntity.status(200).body("Ok");
     }
 
-    @RequestMapping(value = "/user-skillset-profile/{id}", method = RequestMethod.GET)
-    public Flux<SkillSetProfileAndLevelDto> getUserSkillSetProfile(@PathVariable("id") Integer userId) {
-        return this.skillSetProfileService.getUserSkillSetProfiles(userId)
+    @RequestMapping(value = "/user-skillset-profile", method = RequestMethod.GET)
+    public Flux<SkillSetProfileAndLevelDto> getUserSkillSetProfile(JwtAuthenticationToken jwtToken) {
+        String username = (String)jwtToken.getToken().getClaims().get("preferred_username");
+        return this.userService.getUserByUserName(username)
+                .map(user -> user.getId())
+                .flatMapMany(userId -> this.skillSetProfileService.getUserSkillSetProfiles(userId))
                 .map(skillSetProfile -> {
                     logger.info("skillsetprofile: {}", skillSetProfile.toString());
                     SkillSetProfileAndLevelDto skillSetProfileAndLevelDto = new SkillSetProfileAndLevelDto();
@@ -63,7 +66,7 @@ public class SkillSetProfilerController {
                             });
                 })
                 .onErrorResume(error -> {
-                    logger.error("Error when getting user (id:{}), error: {}", userId, error.getMessage());
+                    logger.error("Error when getting user (id:{}), error: {}", username, error.getMessage());
                     return Flux.error(new Error("User skill set profile not found"));
                 });
     }
