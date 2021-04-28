@@ -413,4 +413,9 @@ class QuestServiceImpl implements QuestService {
     public Mono<Void> deleteQuestTakerRequest(Integer id) {
         return this.questTakerRequestRepo.deleteById(id);
     }
+
+    @Override
+    public Flux<Quest> getUserProposedQuests(String username) {
+        return this.questRepo.findProposedQuestByUsername(username);
+    }
 }

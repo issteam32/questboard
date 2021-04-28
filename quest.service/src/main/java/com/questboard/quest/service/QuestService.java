@@ -52,6 +52,7 @@ public interface QuestService {
     public Flux<QuestTakerRequest> getQuestTakerRequestByQuestId(Integer questId);
     public Mono<QuestTakerRequest> getQuestTakerRequestById(Integer id);
     public Mono<Void> deleteQuestTakerRequest(Integer id);
+    public Flux<Quest> getUserProposedQuests(String username);
 
 }
 

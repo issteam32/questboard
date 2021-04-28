@@ -331,4 +331,10 @@ public class QuestController {
         QuestWithToken questWithToken = new QuestWithToken(quest, token.getToken().getTokenValue());
         questSender.send(questWithToken);
     }
+
+    @RequestMapping(value = "/user-proposed-quests", method = RequestMethod.GET)
+    public Flux<Quest> getUserProposedQuest(JwtAuthenticationToken token) {
+        String username = (String)token.getToken().getClaims().get("preffered_username");
+        return this.questService.getUserProposedQuests(username);
+    }
 }
