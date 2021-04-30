@@ -42,7 +42,7 @@ public class UserController {
 
     @GetMapping("/health-check")
     public ResponseEntity<String> redinessCheck() {
-        return ResponseEntity.status(200).body("Ok");
+        return ResponseEntity.status(200).body("Ok version 2");
     }
 
     @RequestMapping(value = "/user-with-everyday-profile", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
