@@ -100,7 +100,7 @@ class QuestServiceImpl implements QuestService {
         return this.questRepo.findById(quest.getId())
                 .flatMap(q -> {
                     if (quest.getAwardedTo() != null) {
-                        q.setAwarded(quest.getAwarded());
+                        q.setAwardedTo(quest.getAwardedTo());
                     }
                     if (quest.getCategory() != null) {
                         q.setCategory(quest.getCategory());
