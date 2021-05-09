@@ -70,6 +70,8 @@ public class UserController {
                     .map(ResponseEntity::ok)
                     .onErrorResume(error -> {
                         logger.error("Error occur when creating new user ");
+                        logger.error("{}", error.getMessage());
+                        logger.error("{}", error.getStackTrace());
                         return Mono.just(ResponseEntity.badRequest()
                                 .body(false));
                     });
