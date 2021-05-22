@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public
-class QuestServiceImpl implements QuestService {
+public class QuestServiceImpl implements QuestService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 

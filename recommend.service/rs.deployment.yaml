@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rs-cluster-ip-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: rs-deployment
+  ports:
+    - port: 8091
+      targetPort: 8091
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rs-deployment
+  labels:
+    app: rs-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rs-deployment
+  template:
+    metadata:
+      labels:
+        app: rs-deployment
+    spec:
+      containers:
+        - name: rs-deployment
+          image: rs-service-image
+          ports:
+            - containerPort: 8091
+              protocol: TCP
+          env:
+            - name: QUESTSVC_CLUSTER_IP
+              value: ""
+            - name: REDIS_HOST
+              value: redis-master
+            - name: REDIS_PORT
+              value: "6379"

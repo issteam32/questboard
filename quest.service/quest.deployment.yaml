@@ -91,3 +91,7 @@ spec:
                 secretKeyRef:
                   name: questsvc-db-secret
                   key: user_cluster_ip
+            - name: REDIS_HOST
+              value: redis-master
+            - name: REDIS_PORT
+              value: "6379"

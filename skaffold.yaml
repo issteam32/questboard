@@ -37,6 +37,7 @@ deploy:
     - quest.service/quest.deployment.yaml
     - review.service/review.deployment.yaml
     - reward.service/reward.deployment.yaml
+    - redis-deployment.yaml
 portForward:
 - resourceType: service
   resourceName: demo-spring-rx
